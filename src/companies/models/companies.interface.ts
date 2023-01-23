@@ -12,6 +12,7 @@ export interface Company {
     zipCode: string;
     phone: string;
     status: number;
+    token: string;
     password: string;
     passwordResetToken?: string;
     passwordResetExpires?: Date;

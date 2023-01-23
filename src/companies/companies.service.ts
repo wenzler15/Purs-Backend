@@ -107,9 +107,19 @@ export class CompaniesService {
 
     company.password = undefined;
 
+    const token = this.generateToken({ id: company.id });
+
+    const newData = company;
+    newData.token = token;
+
+    await this.companyRepository.save({
+      ...company,
+      ...newData,
+    });
+
     return {
       message: 'User Logged',
-      token: this.generateToken({ id: company.id }),
+      token,
       company
     };
   }

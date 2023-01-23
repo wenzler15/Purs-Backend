@@ -40,6 +40,9 @@ export class CompanyEntity {
     status: number;
 
     @Column({ default: '' })
+    token: string;
+
+    @Column({ default: '' })
     password: string;
 
     @Column({ default: '' })
