@@ -31,13 +31,16 @@ export class CompaniesService {
 
     if (companyExists) throw new HttpException("Company already exists!", HttpStatus.BAD_REQUEST);
 
+    createCompanyDto.password = await bcrypt.hash(createCompanyDto.password, 10);
+
     const company = await this.companyRepository.save(createCompanyDto);
 
     company.password = undefined;
     company.passwordResetExpires = undefined;
     company.passwordResetToken = undefined;
+    company.token = undefined;
 
-    return { message: 'User created!', company }
+    return { message: 'Company created!', company }
   }
 
   async findAll() {
@@ -47,6 +50,7 @@ export class CompaniesService {
       company.password = undefined;
       company.passwordResetExpires = undefined;
       company.passwordResetToken = undefined;
+      company.token = undefined;
     });
 
     return companies;
@@ -60,6 +64,7 @@ export class CompaniesService {
     company.password = undefined;
     company.passwordResetExpires = undefined;
     company.passwordResetToken = undefined;
+    company.token = undefined;
 
     return company;
   }

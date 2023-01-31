@@ -1,20 +1,22 @@
 /* eslint-disable prettier/prettier */
-export interface Company {
+export interface User {
     id: number;
+    idCompany: number;
+    idRole: number;
+    idLeader?: number;
+    cpf: string;
     name: string;
-    cnpj: string;
     createdAt: Date;
     updatedAt: Date;
     email: string;
     street?: string;
     district?: string;
-    houseNumber?: string;
     city: string;
     state: string;
     zipCode: string;
     phone: string;
-    status: number;
-    token: string;
+    status?: number;
+    token?: string;
     password: string;
     passwordResetToken?: string;
     passwordResetExpires?: Date;
