@@ -10,6 +10,8 @@ import { AuthEntity } from './models/auth.entity';
 import { ForgotPasswordEntity } from './models/forgotPassword.entity';
 import { SendGridService } from '@anchan828/nest-sendgrid';
 import { ResetPasswordEntity } from './models/resetPassword.entity';
+import { Headers } from '@nestjs/common';
+
 const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
@@ -69,8 +71,14 @@ export class CompaniesService {
     return company;
   }
 
-  async update(id: number, updateCompanyDto: Company) {
+  async update(id: number, updateCompanyDto: Company, token: Headers) {
     const company = await this.companyRepository.findOne({ where: { id } });
+
+    const decodedToken = this.decodeToken(token)
+
+    if (decodedToken.id != id) {
+      throw new HttpException("You don't have permission!", HttpStatus.FORBIDDEN);
+    }
 
     if (!company) throw new HttpException("Company didn't exists!", HttpStatus.BAD_REQUEST);
 
@@ -89,7 +97,13 @@ export class CompaniesService {
     return { message: 'Company updated', company: companyUpdated };
   }
 
-  async remove(id: number) {
+  async remove(id: number, token: Headers) {
+    const decodedToken = this.decodeToken(token)
+
+    if (decodedToken.id != id) {
+      throw new HttpException("You don't have permission!", HttpStatus.FORBIDDEN);
+    }
+
     const company = await this.companyRepository.findOne({ where: { id } });
 
     if (!company) throw new HttpException("Company didn't exists!", HttpStatus.BAD_REQUEST);
@@ -196,6 +210,10 @@ export class CompaniesService {
     });
 
     return { message: 'Password updated!' }
+  }
+
+  decodeToken(token: object) {
+    return jwt.decode(token);
   }
 
   generateToken(params = {}) {

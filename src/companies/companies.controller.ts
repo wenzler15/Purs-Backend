@@ -5,7 +5,7 @@ import { AuthEntity } from './models/auth.entity';
 import { Company } from './models/companies.interface';
 import { ForgotPasswordEntity } from './models/forgotPassword.entity';
 import { ResetPasswordEntity } from './models/resetPassword.entity';
-
+import { Headers } from "@nestjs/common";
 @Controller('companies')
 export class CompaniesController {
   constructor(private readonly companiesService: CompaniesService) { }
@@ -38,18 +38,18 @@ export class CompaniesController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateCompanyDto: Company) {
+  update(@Param('id') id: string, @Body() updateCompanyDto: Company, @Headers('token') token: Headers) {
     try {
-      return this.companiesService.update(+id, updateCompanyDto);
+      return this.companiesService.update(+id, updateCompanyDto, token);
     } catch (err) {
       throw new Error("Internal Server Error");
     }
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
+  remove(@Param('id') id: string, @Headers('token') token: Headers) {
     try {
-      return this.companiesService.remove(+id);
+      return this.companiesService.remove(+id, token);
     } catch (err) {
       throw new Error("Internal Server Error");
     }

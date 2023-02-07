@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import {
   Controller,
   Get,
@@ -12,6 +13,7 @@ import { ForgotPasswordEntity } from 'src/companies/models/forgotPassword.entity
 import { ResetPasswordEntity } from 'src/companies/models/resetPassword.entity';
 import { User } from './models/users.interface';
 import { UsersService } from './users.service';
+import { Headers } from "@nestjs/common";
 
 @Controller('users')
 export class UsersController {
@@ -45,18 +47,36 @@ export class UsersController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: User) {
+  update(
+    @Param('id') id: string,
+    @Body() updateUserDto: User,
+    @Headers('token') token: Headers,
+  ) {
     try {
-      return this.usersService.update(+id, updateUserDto);
+      return this.usersService.update(+id, updateUserDto, token);
     } catch (err) {
       throw new Error("Internal Server Error");
     }
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
+  remove(@Param('id') id: string, @Headers('token') token: Headers) {
     try {
-      return this.usersService.remove(+id);
+      return this.usersService.remove(+id, token);
+    } catch (err) {
+      throw new Error("Internal Server Error");
+    }
+  }
+}
+
+@Controller('userLeader')
+export class UserLeaderController {
+  constructor(private readonly usersService: UsersService) { }
+
+  @Get()
+  findAll(@Headers('token') token: Headers,) {
+    try {
+      return this.usersService.findAllLeaders(token);
     } catch (err) {
       throw new Error("Internal Server Error");
     }

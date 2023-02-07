@@ -6,11 +6,17 @@ export class RoleEntity {
     @PrimaryGeneratedColumn()
     id: number;
 
+    @Column({ type: 'integer' })
+    idCompany: number;
+
     @Column({ default: '' })
     roleName: string;
 
     @Column({ default: '' })
     roleDesc: string;
+
+    @Column({ type: 'integer', default: 1 })
+    leader: number;
 
     @Column({ type: 'integer', default: 1 })
     status: number;

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
 /* eslint-disable prettier/prettier */
 import { SendGridService } from '@anchan828/nest-sendgrid';
 import { HttpException } from '@nestjs/common';
@@ -10,6 +11,8 @@ import { ResetPasswordEntity } from 'src/companies/models/resetPassword.entity';
 import { Repository } from 'typeorm';
 import { UserEntity } from './models/users.entity';
 import { User } from './models/users.interface';
+import { Headers } from '@nestjs/common';
+
 const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
@@ -57,6 +60,14 @@ export class UsersService {
     return users;
   }
 
+  async findAllLeaders(token: Headers) {
+    const decodeToken = this.decodeToken(token)
+
+    const leaders = await this.userRepository.find({ where: { idCompany: decodeToken.company } });
+
+    return leaders;
+  }
+
   async findOne(id: number) {
     const user = await this.userRepository.findOne({ where: { id } });
 
@@ -70,7 +81,12 @@ export class UsersService {
     return user;
   }
 
-  async update(id: number, updateUserDto: User) {
+  async update(id: number, updateUserDto: User, token: Headers) {
+    const decodedToken = this.decodeToken(token)
+
+    if (decodedToken.id != id) {
+      throw new HttpException("You don't have permission!", HttpStatus.FORBIDDEN);
+    }
     const user = await this.userRepository.findOne({ where: { id } });
 
     if (!user) throw new HttpException("User didn't exists!", HttpStatus.BAD_REQUEST);
@@ -91,7 +107,13 @@ export class UsersService {
     return { message: 'User updated', user: userUpdated };
   }
 
-  async remove(id: number) {
+  async remove(id: number, token: Headers) {
+    const decodedToken = this.decodeToken(token)
+
+    if (decodedToken.id != id) {
+      throw new HttpException("You don't have permission!", HttpStatus.FORBIDDEN);
+    }
+
     const user = await this.userRepository.findOne({ where: { id } });
 
     if (!user) throw new HttpException("User didn't exists!", HttpStatus.BAD_REQUEST);
@@ -116,7 +138,7 @@ export class UsersService {
     user.passwordResetExpires = undefined;
     user.passwordResetToken = undefined;
 
-    const token = this.generateToken({ id: user.id });
+    const token = this.generateToken({ id: user.id, company: user.idCompany });
 
     const newData = user;
     newData.token = token;
@@ -200,6 +222,10 @@ export class UsersService {
     });
 
     return { message: 'Password updated!' }
+  }
+
+  decodeToken(token: object) {
+    return jwt.decode(token);
   }
 
   generateToken(params = {}) {
