@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { UsersService } from './users.service';
 import {
+  UserLeaderController,
   UsersAuthController,
   UsersController,
   UsersForgotPasswordController,
@@ -16,6 +17,7 @@ import { UserEntity } from './models/users.entity';
     UsersAuthController,
     UsersForgotPasswordController,
     UsersResetPasswordController,
+    UserLeaderController
   ],
   providers: [UsersService]
 })

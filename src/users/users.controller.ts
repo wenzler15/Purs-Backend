@@ -74,7 +74,7 @@ export class UserLeaderController {
   constructor(private readonly usersService: UsersService) { }
 
   @Get()
-  findAll(@Headers('token') token: Headers,) {
+  findAll(@Headers('token') token: Headers) {
     try {
       return this.usersService.findAllLeaders(token);
     } catch (err) {

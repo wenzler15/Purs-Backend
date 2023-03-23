@@ -63,7 +63,7 @@ export class UsersService {
   async findAllLeaders(token: Headers) {
     const decodeToken = this.decodeToken(token)
 
-    const leaders = await this.userRepository.find({ where: { idCompany: decodeToken.company } });
+    const leaders = await this.userRepository.createQueryBuilder('user').innerJoinAndSelect('role', 'role', 'role.id = user.idRole').select("user.*").getMany();
 
     return leaders;
   }
