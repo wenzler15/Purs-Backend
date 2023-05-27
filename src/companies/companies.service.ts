@@ -10,7 +10,6 @@ import { AuthEntity } from './models/auth.entity';
 import { ForgotPasswordEntity } from './models/forgotPassword.entity';
 import { SendGridService } from '@anchan828/nest-sendgrid';
 import { ResetPasswordEntity } from './models/resetPassword.entity';
-import { Headers } from '@nestjs/common';
 
 const crypto = require('crypto');
 const bcrypt = require('bcryptjs');

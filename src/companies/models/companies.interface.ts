@@ -2,6 +2,7 @@
 export interface Company {
     id: number;
     name: string;
+    corporateName: string;
     cnpj: string;
     createdAt: Date;
     updatedAt: Date;

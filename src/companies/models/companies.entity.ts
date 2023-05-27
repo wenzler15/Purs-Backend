@@ -10,6 +10,9 @@ export class CompanyEntity {
     name: string;
 
     @Column({ default: '' })
+    corporateName: string;
+
+    @Column({ default: '' })
     cnpj: string;
 
     @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
@@ -27,28 +30,28 @@ export class CompanyEntity {
     @Column({ default: '', nullable: true })
     district: string;
 
-    @Column({ default: '' })
+    @Column({ default: '', nullable: true })
     city: string;
 
-    @Column({ default: '' })
+    @Column({ default: '', nullable: true })
     state: string;
 
-    @Column({ default: '' })
+    @Column({ default: '', nullable: true })
     zipCode: string;
 
-    @Column({ default: '' })
+    @Column({ default: '', nullable: true })
     phone: string;
 
     @Column({ type: 'integer', default: 1 })
     status: number;
 
-    @Column({ default: '' })
+    @Column({ default: '', nullable: true })
     token: string;
 
-    @Column({ default: '' })
+    @Column({ default: ''})
     password: string;
 
-    @Column({ default: '' })
+    @Column({ default: '', nullable: true })
     passwordResetToken: string;
 
     @Column({ type: 'timestamp', nullable: true })
