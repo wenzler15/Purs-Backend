@@ -11,7 +11,7 @@ import { ResetPasswordEntity } from 'src/companies/models/resetPassword.entity';
 import { Repository } from 'typeorm';
 import { UserEntity } from './models/users.entity';
 import { User } from './models/users.interface';
-import { Headers } from '@nestjs/common';
+import { Authorization } from './models/authorization.interface';
 
 const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
@@ -60,7 +60,7 @@ export class UsersService {
     return users;
   }
 
-  async findAllLeaders(token: Headers) {
+  async findAllLeaders(token: string) {
     const decodeToken = this.decodeToken(token)
 
     const leaders = await this.userRepository.createQueryBuilder('user').innerJoinAndSelect('role', 'role', 'role.id = user.idRole').select("user.*").getMany();
@@ -81,7 +81,7 @@ export class UsersService {
     return user;
   }
 
-  async update(id: number, updateUserDto: User, token: Headers) {
+  async update(id: number, updateUserDto: User, token: string) {
     const decodedToken = this.decodeToken(token)
 
     if (decodedToken.id != id) {
@@ -107,7 +107,7 @@ export class UsersService {
     return { message: 'User updated', user: userUpdated };
   }
 
-  async remove(id: number, token: Headers) {
+  async remove(id: number, token: string) {
     const decodedToken = this.decodeToken(token)
 
     if (decodedToken.id != id) {
@@ -224,8 +224,8 @@ export class UsersService {
     return { message: 'Password updated!' }
   }
 
-  decodeToken(token: object) {
-    return jwt.decode(token);
+  decodeToken(token: string) {
+    return jwt.verify(token, '7ccd7835da99ef1dbbce76128d3ae0e7')
   }
 
   generateToken(params = {}) {

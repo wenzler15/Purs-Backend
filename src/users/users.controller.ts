@@ -14,6 +14,7 @@ import { ResetPasswordEntity } from 'src/companies/models/resetPassword.entity';
 import { User } from './models/users.interface';
 import { UsersService } from './users.service';
 import { Headers } from "@nestjs/common";
+import { Authorization } from './models/authorization.interface';
 
 @Controller('users')
 export class UsersController {
@@ -50,19 +51,19 @@ export class UsersController {
   update(
     @Param('id') id: string,
     @Body() updateUserDto: User,
-    @Headers('token') token: Headers,
+    @Headers() headers: Authorization,
   ) {
     try {
-      return this.usersService.update(+id, updateUserDto, token);
+      return this.usersService.update(+id, updateUserDto, headers.authorization);
     } catch (err) {
       throw new Error("Internal Server Error");
     }
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string, @Headers('token') token: Headers) {
+  remove(@Param('id') id: string, @Headers() headers: Authorization) {
     try {
-      return this.usersService.remove(+id, token);
+      return this.usersService.remove(+id, headers.authorization);
     } catch (err) {
       throw new Error("Internal Server Error");
     }
@@ -74,9 +75,9 @@ export class UserLeaderController {
   constructor(private readonly usersService: UsersService) { }
 
   @Get()
-  findAll(@Headers('token') token: Headers) {
+  findAll(@Headers() hearders: Authorization) {
     try {
-      return this.usersService.findAllLeaders(token);
+      return this.usersService.findAllLeaders(hearders.authorization);
     } catch (err) {
       throw new Error("Internal Server Error");
     }
