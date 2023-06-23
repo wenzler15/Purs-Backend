@@ -5,7 +5,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { HttpException } from '@nestjs/common';
 import { HttpStatus } from '@nestjs/common';
 import { UserEntity } from 'src/users/models/users.entity';
-import { log } from 'console';
 const jwt = require('jsonwebtoken');
 
 @Injectable()

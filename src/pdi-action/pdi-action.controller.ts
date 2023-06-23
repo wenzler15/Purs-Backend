@@ -1,34 +1,34 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Headers } from '@nestjs/common';
 import { PdiActionService } from './pdi-action.service';
-import { CreatePdiActionDto } from './dto/create-pdi-action.dto';
-import { UpdatePdiActionDto } from './dto/update-pdi-action.dto';
+import { PdiEntity } from 'src/pdi/models/pdi.entity';
+import { Authorization } from 'src/users/models/authorization.interface';
 
 @Controller('pdi-action')
 export class PdiActionController {
-  constructor(private readonly pdiActionService: PdiActionService) {}
+  constructor(private readonly pdiActionService: PdiActionService) { }
 
   @Post()
-  create(@Body() createPdiActionDto: CreatePdiActionDto) {
-    return this.pdiActionService.create(createPdiActionDto);
+  create(@Body() createPdiActionDto: PdiEntity, @Headers() headers: Authorization) {
+    return this.pdiActionService.create(createPdiActionDto, headers.authorization);
   }
 
   @Get()
-  findAll() {
-    return this.pdiActionService.findAll();
+  findAll(@Headers() headers: Authorization) {
+    return this.pdiActionService.findAll(headers.authorization);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.pdiActionService.findOne(+id);
+  findOne(@Param('id') id: string, @Headers() headers: Authorization) {
+    return this.pdiActionService.findOne(+id, headers.authorization);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updatePdiActionDto: UpdatePdiActionDto) {
-    return this.pdiActionService.update(+id, updatePdiActionDto);
+  update(@Param('id') id: string, @Body() updatePdiActionDto: PdiEntity, @Headers() headers: Authorization) {
+    return this.pdiActionService.update(+id, updatePdiActionDto, headers.authorization);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.pdiActionService.remove(+id);
+  remove(@Param('id') id: string, @Headers() headers: Authorization) {
+    return this.pdiActionService.remove(+id, headers.authorization);
   }
 }

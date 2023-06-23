@@ -1,26 +1,25 @@
 import { Injectable } from '@nestjs/common';
-import { CreatePdiActionDto } from './dto/create-pdi-action.dto';
-import { UpdatePdiActionDto } from './dto/update-pdi-action.dto';
+import { PdiEntity } from 'src/pdi/models/pdi.entity';
 
 @Injectable()
 export class PdiActionService {
-  create(createPdiActionDto: CreatePdiActionDto) {
+  create(createPdiActionDto: PdiEntity, token: string) {
     return 'This action adds a new pdiAction';
   }
 
-  findAll() {
+  findAll(token: string) {
     return `This action returns all pdiAction`;
   }
 
-  findOne(id: number) {
+  findOne(id: number, token: string) {
     return `This action returns a #${id} pdiAction`;
   }
 
-  update(id: number, updatePdiActionDto: UpdatePdiActionDto) {
+  update(id: number, updatePdiActionDto: PdiEntity, token: string) {
     return `This action updates a #${id} pdiAction`;
   }
 
-  remove(id: number) {
+  remove(id: number, token: string) {
     return `This action removes a #${id} pdiAction`;
   }
 }
