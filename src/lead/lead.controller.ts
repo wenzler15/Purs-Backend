@@ -1,6 +1,7 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
 import { LeadService } from './lead.service';
 import { Lead } from './models/lead.interface';
+import { AuthEntity } from 'src/companies/models/auth.entity';
 
 @Controller('lead')
 export class LeadController {
@@ -24,5 +25,19 @@ export class LeadController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.leadService.remove(+id);
+  }
+}
+
+@Controller('leadAuth')
+export class LeadAuthController {
+  constructor(private readonly leadService: LeadService) {}
+
+  @Post()
+  auth(@Body() body: AuthEntity) {
+    try {
+      return this.leadService.auth(body);
+    } catch (err) {
+      throw new Error("Internal Server Error");
+    }
   }
 }
