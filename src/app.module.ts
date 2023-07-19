@@ -8,6 +8,7 @@ import { RolesModule } from './roles/roles.module';
 import { LeadModule } from './lead/lead.module';
 import { PdiModule } from './pdi/pdi.module';
 import { PdiActionModule } from './pdi-action/pdi-action.module';
+import { ExportUrlModule } from './export-url/export-url.module';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
@@ -30,6 +31,7 @@ import { PdiActionModule } from './pdi-action/pdi-action.module';
     LeadModule,
     PdiModule,
     PdiActionModule,
+    ExportUrlModule,
   ],
   controllers: [],
   providers: [],

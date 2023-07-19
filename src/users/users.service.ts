@@ -11,7 +11,8 @@ import { ResetPasswordEntity } from 'src/companies/models/resetPassword.entity';
 import { Repository } from 'typeorm';
 import { UserEntity } from './models/users.entity';
 import { User } from './models/users.interface';
-import { Authorization } from './models/authorization.interface';
+import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { ExportUrlEntity } from 'src/export-url/models/exportUrl.entity';
 
 const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
@@ -22,6 +23,8 @@ export class UsersService {
   constructor(
     @InjectRepository(UserEntity)
     private readonly userRepository: Repository<UserEntity>,
+    @InjectRepository(ExportUrlEntity)
+    private readonly exportUrl: Repository<ExportUrlEntity>,
     private readonly sendGrid: SendGridService,
   ) { }
 
@@ -194,6 +197,32 @@ export class UsersService {
     return { message: 'Token sent' };
   }
 
+  async generateURL(file: any, token: string) {
+    const userDecoded = await this.decodeToken(token);
+
+    const user = await this.userRepository.findOne({ where: { id: userDecoded.id } });
+
+    const ext = file.originalname.split(".")[1];
+
+    const hash = crypto.createHash('sha256');
+
+    hash.update(user.email);
+
+    const hashedEmail = hash.digest('hex');
+
+    await this.uploadFile(file, 'purs-docs', `${hashedEmail}.${ext}`)
+
+    const urlExists = await this.exportUrl.findOne({ where: { link: `https://purs-docs.s3.amazonaws.com/${hashedEmail}.${ext}` } });
+
+    if (!urlExists) {
+      const url = await this.exportUrl.save({ link: `https://purs-docs.s3.amazonaws.com/${hashedEmail}.${ext}` });
+
+      return { message: 'Export url created!', link: url.id }
+    }
+
+    return { message: 'Export url created!', link: urlExists.id }
+  }
+
   async resetPassword(resetPassword: ResetPasswordEntity) {
     const { email, token, password } = resetPassword;
 
@@ -232,5 +261,30 @@ export class UsersService {
     return jwt.sign(params, '7ccd7835da99ef1dbbce76128d3ae0e7', {
       expiresIn: 86400,
     });
+  }
+
+  async uploadFile(file: any, bucket: string, fileName: string) {
+    const client = new S3Client({
+      region: "us-east-1",
+      credentials: {
+        accessKeyId: process.env.AWS_KEY,
+        secretAccessKey: process.env.AWS_SECRET,
+      },
+    });
+
+    const uploadParams = {
+      Bucket: bucket,
+      Key: fileName,
+      Body: file.buffer,
+    };
+
+    try {
+      const command = new PutObjectCommand(uploadParams);
+      const response = await client.send(command);
+      return response;
+    } catch (error) {
+      console.error("Erro ao fazer upload do arquivo:", error);
+    }
+
   }
 }

@@ -7,6 +7,8 @@ import {
   Patch,
   Param,
   Delete,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
 import { AuthEntity } from 'src/companies/models/auth.entity';
 import { ForgotPasswordEntity } from 'src/companies/models/forgotPassword.entity';
@@ -15,6 +17,7 @@ import { User } from './models/users.interface';
 import { UsersService } from './users.service';
 import { Headers } from "@nestjs/common";
 import { Authorization } from './models/authorization.interface';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('users')
 export class UsersController {
@@ -125,3 +128,19 @@ export class UsersResetPasswordController {
     }
   }
 }
+
+@Controller('usersCreateURLOrg')
+export class UsersCreateURLOrgController {
+  constructor(private readonly usersService: UsersService) { }
+
+  @Post()
+  @UseInterceptors(FileInterceptor("orgfile"))
+  createURL(@UploadedFile() file: Express.Multer.File, @Headers() headers: Authorization) {
+    try {
+      return this.usersService.generateURL(file, headers.authorization);
+    } catch (err) {
+      throw new Error('Internal Server Error');
+    }
+  }
+}
+
