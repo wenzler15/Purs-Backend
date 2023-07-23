@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 /* eslint-disable prettier/prettier */
-import { SendGridService } from '@anchan828/nest-sendgrid';
 import { HttpException } from '@nestjs/common';
 import { HttpStatus } from '@nestjs/common';
 import { Injectable } from '@nestjs/common';
@@ -13,6 +12,7 @@ import { UserEntity } from './models/users.entity';
 import { User } from './models/users.interface';
 import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { ExportUrlEntity } from 'src/export-url/models/exportUrl.entity';
+import { MailerService } from '@nestjs-modules/mailer';
 
 const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
@@ -25,7 +25,7 @@ export class UsersService {
     private readonly userRepository: Repository<UserEntity>,
     @InjectRepository(ExportUrlEntity)
     private readonly exportUrl: Repository<ExportUrlEntity>,
-    private readonly sendGrid: SendGridService,
+    private readonly mailerService: MailerService,
   ) { }
 
   async create(createUserDto: User) {
@@ -186,11 +186,10 @@ export class UsersService {
       ...newInfos,
     });
 
-    await this.sendGrid.send({
+    await this.mailerService.sendMail({
       to: email,
       from: process.env.SEND_GRID_FROM,
       subject: 'Esqueci minha senha',
-      text: 'Parece que você esqueceu sua senha',
       html: `<p>Esqueceu sua senha? Não tem problema, use esse token para redefinir sua senha: ${token} <p>`,
     });
 

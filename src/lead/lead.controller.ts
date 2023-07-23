@@ -41,3 +41,17 @@ export class LeadAuthController {
     }
   }
 }
+
+@Controller('leadEmail')
+export class leadEmailController {
+  constructor(private readonly leadService: LeadService) {}
+
+  @Post()
+  sendEmail(@Body() body: any) {
+    try {
+      return this.leadService.sendEmail(body);
+    } catch (err) {
+      throw new Error("Internal Server Error");
+    }
+  }
+}

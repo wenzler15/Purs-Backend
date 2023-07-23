@@ -1,5 +1,4 @@
 /* eslint-disable prettier/prettier */
-import { SendGridService } from '@anchan828/nest-sendgrid';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AuthEntity } from 'src/companies/models/auth.entity';
@@ -8,6 +7,7 @@ import { ResetPasswordEntity } from 'src/companies/models/resetPassword.entity';
 import { Repository } from 'typeorm';
 import { LeadEntity } from './models/lead.entity';
 import { Lead } from './models/lead.interface';
+import { MailerService } from '@nestjs-modules/mailer';
 
 const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
@@ -18,7 +18,7 @@ export class LeadService {
   constructor(
     @InjectRepository(LeadEntity)
     private readonly leadRepository: Repository<LeadEntity>,
-    private readonly sendGrid: SendGridService,
+    private readonly mailerService: MailerService,
   ) { }
 
   async create(createLeadDto: Lead) {
@@ -98,6 +98,19 @@ export class LeadService {
     });
   }
 
+  async sendEmail(body: any) {
+    const {email, name, cellphone, company} = body;
+
+    await this.mailerService.sendMail({
+      to: process.env.SEND_GRID_FROM,
+      from: process.env.SEND_GRID_FROM,
+      subject: 'Novo Lead',
+      html: `<p>Olá, tivemos um novo lead interessado. <br/> E-mail: ${email} <br/> Nome: ${name} <br/> Celular: ${cellphone} <br/>Empresa: ${company}<p>`,
+    });
+
+    return {message: "Email sent"}
+  }
+
   async auth(body: AuthEntity) {
     const { email, password } = body;
 
@@ -167,11 +180,10 @@ export class LeadService {
       ...newInfos,
     });
 
-    await this.sendGrid.send({
+    await this.mailerService.sendMail({
       to: email,
       from: process.env.SEND_GRID_FROM,
       subject: 'Esqueci minha senha',
-      text: 'Parece que você esqueceu sua senha',
       html: `<p>Esqueceu sua senha? Não tem problema, use esse token para redefinir sua senha: ${token} <p>`,
     });
 

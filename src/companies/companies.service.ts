@@ -8,7 +8,7 @@ import { HttpException } from '@nestjs/common/exceptions';
 import { HttpStatus } from '@nestjs/common/enums';
 import { AuthEntity } from './models/auth.entity';
 import { ForgotPasswordEntity } from './models/forgotPassword.entity';
-import { SendGridService } from '@anchan828/nest-sendgrid';
+import { MailerService } from '@nestjs-modules/mailer';
 import { ResetPasswordEntity } from './models/resetPassword.entity';
 
 const crypto = require('crypto');
@@ -20,7 +20,7 @@ export class CompaniesService {
   constructor(
     @InjectRepository(CompanyEntity)
     private readonly companyRepository: Repository<CompanyEntity>,
-    private readonly sendGrid: SendGridService,
+    private readonly mailerService: MailerService,
   ) { }
 
   async create(createCompanyDto: Company) {
@@ -170,11 +170,10 @@ export class CompaniesService {
       ...newInfos,
     });
 
-    await this.sendGrid.send({
+    await this.mailerService.sendMail({
       to: email,
       from: process.env.SEND_GRID_FROM,
       subject: 'Esqueci minha senha',
-      text: 'Parece que você esqueceu sua senha',
       html: `<p>Esqueceu sua senha? Não tem problema, use esse token para redefinir sua senha: ${token} <p>`,
     });
 

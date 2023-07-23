@@ -1,4 +1,3 @@
-import { SendGridModule } from '@anchan828/nest-sendgrid';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -9,6 +8,8 @@ import { LeadModule } from './lead/lead.module';
 import { PdiModule } from './pdi/pdi.module';
 import { PdiActionModule } from './pdi-action/pdi-action.module';
 import { ExportUrlModule } from './export-url/export-url.module';
+import { MailerModule } from '@nestjs-modules/mailer';
+
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
@@ -23,8 +24,17 @@ import { ExportUrlModule } from './export-url/export-url.module';
       autoLoadEntities: true,
       synchronize: true,
     }),
-    SendGridModule.forRoot({
-      apikey: process.env.SEND_GRID_KEY,
+    MailerModule.forRoot({
+      transport: {
+        host: 'smtp.gmail.com',
+        port: 465,
+        ignoreTLS: true,
+        secure: true,
+        auth: {
+            user: process.env.SEND_GRID_FROM,
+            pass: process.env.SEND_GRID_PASS
+        },
+    }
     }),
     UsersModule,
     RolesModule,
