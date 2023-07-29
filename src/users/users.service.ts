@@ -13,6 +13,7 @@ import { User } from './models/users.interface';
 import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { ExportUrlEntity } from 'src/export-url/models/exportUrl.entity';
 import { MailerService } from '@nestjs-modules/mailer';
+import { LeadEntity } from 'src/lead/models/lead.entity';
 
 const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
@@ -25,6 +26,8 @@ export class UsersService {
     private readonly userRepository: Repository<UserEntity>,
     @InjectRepository(ExportUrlEntity)
     private readonly exportUrl: Repository<ExportUrlEntity>,
+    @InjectRepository(LeadEntity)
+    private readonly leadRepository: Repository<LeadEntity>,
     private readonly mailerService: MailerService,
   ) { }
 
@@ -199,7 +202,7 @@ export class UsersService {
   async generateURL(file: any, token: string) {
     const userDecoded = await this.decodeToken(token);
 
-    const user = await this.userRepository.findOne({ where: { id: userDecoded.id } });
+    const user = await this.leadRepository.findOne({ where: { id: userDecoded.id } });
 
     const ext = file.originalname.split(".")[1];
 

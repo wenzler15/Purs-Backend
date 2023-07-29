@@ -11,9 +11,12 @@ import {
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserEntity } from './models/users.entity';
 import { ExportUrlEntity } from 'src/export-url/models/exportUrl.entity';
+import { LeadEntity } from 'src/lead/models/lead.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([UserEntity, ExportUrlEntity])],
+  imports: [
+    TypeOrmModule.forFeature([UserEntity, ExportUrlEntity, LeadEntity]),
+  ],
   controllers: [
     UsersController,
     UsersAuthController,

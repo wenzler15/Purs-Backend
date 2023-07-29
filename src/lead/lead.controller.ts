@@ -5,7 +5,7 @@ import { AuthEntity } from 'src/companies/models/auth.entity';
 
 @Controller('lead')
 export class LeadController {
-  constructor(private readonly leadService: LeadService) {}
+  constructor(private readonly leadService: LeadService) { }
 
   @Post()
   create(@Body() createLeadDto: Lead) {
@@ -30,7 +30,7 @@ export class LeadController {
 
 @Controller('leadAuth')
 export class LeadAuthController {
-  constructor(private readonly leadService: LeadService) {}
+  constructor(private readonly leadService: LeadService) { }
 
   @Post()
   auth(@Body() body: AuthEntity) {
@@ -44,7 +44,7 @@ export class LeadAuthController {
 
 @Controller('leadEmail')
 export class leadEmailController {
-  constructor(private readonly leadService: LeadService) {}
+  constructor(private readonly leadService: LeadService) { }
 
   @Post()
   sendEmail(@Body() body: any) {
@@ -52,6 +52,34 @@ export class leadEmailController {
       return this.leadService.sendEmail(body);
     } catch (err) {
       throw new Error("Internal Server Error");
+    }
+  }
+}
+
+@Controller('leadForgotPassword')
+export class LeadForgotPasswordController {
+  constructor(private readonly leadService: LeadService) { }
+
+  @Post()
+  auth(@Body() forgotPassword: any) {
+    try {
+      return this.leadService.forgotPassword(forgotPassword);
+    } catch (err) {
+      throw new Error('Internal Server Error');
+    }
+  }
+}
+
+@Controller('leadResetPassword')
+export class LeadResetPasswordController {
+  constructor(private readonly leadService: LeadService) { }
+
+  @Post()
+  auth(@Body() resetPassword: any) {
+    try {
+      return this.leadService.resetPassword(resetPassword);
+    } catch (err) {
+      throw new Error('Internal Server Error');
     }
   }
 }
