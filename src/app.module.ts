@@ -9,6 +9,11 @@ import { PdiModule } from './pdi/pdi.module';
 import { PdiActionModule } from './pdi-action/pdi-action.module';
 import { ExportUrlModule } from './export-url/export-url.module';
 import { MailerModule } from '@nestjs-modules/mailer';
+import { QuestionsTypeModule } from './questions-type/questions-type.module';
+import { QuestionsAlternativesModule } from './questions-alternatives/questions-alternatives.module';
+import { QuestionsSectionsModule } from './questions-sections/questions-sections.module';
+import { QuestionsModule } from './questions/questions.module';
+import { ResearchModule } from './research/research.module';
 
 @Module({
   imports: [
@@ -42,6 +47,11 @@ import { MailerModule } from '@nestjs-modules/mailer';
     PdiModule,
     PdiActionModule,
     ExportUrlModule,
+    QuestionsTypeModule,
+    QuestionsAlternativesModule,
+    QuestionsSectionsModule,
+    QuestionsModule,
+    ResearchModule,
   ],
   controllers: [],
   providers: [],
