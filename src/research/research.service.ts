@@ -1,26 +1,57 @@
-import { Injectable } from '@nestjs/common';
-import { CreateResearchDto } from './dto/create-research.dto';
-import { UpdateResearchDto } from './dto/update-research.dto';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { Research } from './models/research.interface';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { ResearchEntity } from './models/research.entity';
 
 @Injectable()
 export class ResearchService {
-  create(createResearchDto: CreateResearchDto) {
+  constructor(
+    @InjectRepository(ResearchEntity)
+    private readonly researchRepository: Repository<ResearchEntity>,
+  ) { }
+
+  async create(createResearchDto: Research) {
     return 'This action adds a new research';
   }
 
-  findAll() {
-    return `This action returns all research`;
+  async findAll(idCompany: number) {
+    const researchs = await this.researchRepository.find({ where: { idCompany }});
+
+    return researchs;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} research`;
+  async myResearch(idUser: number) {
+    const researchs = await this.researchRepository.find({ where: { idUser }});
+
+    return researchs;
   }
 
-  update(id: number, updateResearchDto: UpdateResearchDto) {
-    return `This action updates a #${id} research`;
+  async findOne(id: number) {
+    const research = await this.researchRepository.findOne({ where: { id } });
+
+    if (!research) throw new HttpException("Research didn't exists!", HttpStatus.BAD_REQUEST);
+
+    return research;  
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} research`;
+  async update(id: number, updateResearchDto: Research) {
+    const research = await this.researchRepository.findOne({ where: { id } });
+
+    if (!research) throw new HttpException("Research didn't exists!", HttpStatus.BAD_REQUEST);
+
+    const researchUpdated = await this.researchRepository.save({
+      ...research,
+      ...updateResearchDto,
+    })
+
+    return { message: 'Research updated!', role: researchUpdated };
   }
+
+  async remove(id: number) {
+    const research = await this.researchRepository.findOne({ where: { id } });
+
+    if (!research) throw new HttpException("Research didn't exists!", HttpStatus.BAD_REQUEST);
+
+    return { message: 'Research deleted!', question: this.researchRepository.delete(id) }  }  
 }

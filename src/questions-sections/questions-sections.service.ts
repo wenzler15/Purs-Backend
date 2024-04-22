@@ -1,26 +1,53 @@
-import { Injectable } from '@nestjs/common';
-import { CreateQuestionsSectionDto } from './dto/create-questions-section.dto';
-import { UpdateQuestionsSectionDto } from './dto/update-questions-section.dto';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { QuestionSections } from './models/questions-sections.interface';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { QuestionsSectionsEntity } from './models/questions-sections.entity';
 
 @Injectable()
 export class QuestionsSectionsService {
-  create(createQuestionsSectionDto: CreateQuestionsSectionDto) {
-    return 'This action adds a new questionsSection';
+  constructor(
+    @InjectRepository(QuestionsSectionsEntity)
+    private readonly questionSectionRepository: Repository<QuestionsSectionsEntity>,
+  ) { }
+
+  async create(createQuestionsSectionDto: QuestionSections) {
+    const question = await this.questionSectionRepository.save(createQuestionsSectionDto);
+
+    return { message: 'Question section created!', question }
   }
 
-  findAll() {
-    return `This action returns all questionsSections`;
+  async findAll(idResearch: number) {
+    const researchSections = await this.questionSectionRepository.find({ where: { idResearch }});
+
+    return researchSections;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} questionsSection`;
+  async findOne(id: number) {
+    const sections = await this.questionSectionRepository.findOne({ where: { id } });
+
+    if (!sections) throw new HttpException("Section didn't exists!", HttpStatus.BAD_REQUEST);
+
+    return sections;  
   }
 
-  update(id: number, updateQuestionsSectionDto: UpdateQuestionsSectionDto) {
-    return `This action updates a #${id} questionsSection`;
+  async update(id: number, updateQuestionsSectionDto: QuestionSections) {
+    const section = await this.questionSectionRepository.findOne({ where: { id } });
+
+    if (!section) throw new HttpException("section didn't exists!", HttpStatus.BAD_REQUEST);
+
+    const sectionUpdated = await this.questionSectionRepository.save({
+      ...section,
+      ...updateQuestionsSectionDto,
+    })
+
+    return { message: 'Section updated!', role: sectionUpdated };
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} questionsSection`;
-  }
+  async remove(id: number) {
+    const section = await this.questionSectionRepository.findOne({ where: { id } });
+
+    if (!section) throw new HttpException("section didn't exists!", HttpStatus.BAD_REQUEST);
+
+    return { message: 'Section deleted!', question: this.questionSectionRepository.delete(id) }  }
 }

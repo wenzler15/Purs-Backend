@@ -1,20 +1,19 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
 import { QuestionsSectionsService } from './questions-sections.service';
-import { CreateQuestionsSectionDto } from './dto/create-questions-section.dto';
-import { UpdateQuestionsSectionDto } from './dto/update-questions-section.dto';
+import { QuestionSections } from './models/questions-sections.interface';
 
 @Controller('questions-sections')
 export class QuestionsSectionsController {
   constructor(private readonly questionsSectionsService: QuestionsSectionsService) {}
 
   @Post()
-  create(@Body() createQuestionsSectionDto: CreateQuestionsSectionDto) {
+  create(@Body() createQuestionsSectionDto: QuestionSections) {
     return this.questionsSectionsService.create(createQuestionsSectionDto);
   }
 
-  @Get()
-  findAll() {
-    return this.questionsSectionsService.findAll();
+  @Get('getSections/:id')
+  findAll(@Param('id') idResearch: string) {
+    return this.questionsSectionsService.findAll(+idResearch);
   }
 
   @Get(':id')
@@ -23,7 +22,7 @@ export class QuestionsSectionsController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateQuestionsSectionDto: UpdateQuestionsSectionDto) {
+  update(@Param('id') id: string, @Body() updateQuestionsSectionDto: QuestionSections) {
     return this.questionsSectionsService.update(+id, updateQuestionsSectionDto);
   }
 

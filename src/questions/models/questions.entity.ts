@@ -13,6 +13,9 @@ export class QuestionsEntity {
     idResearch: number;
 
     @Column({ type: 'integer' })
+    idSection: number;
+
+    @Column({ type: 'integer' })
     idQuestionType: number;
 
     @Column({ type: 'boolean' })

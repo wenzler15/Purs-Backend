@@ -1,14 +1,13 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
 import { QuestionsTypeService } from './questions-type.service';
-import { CreateQuestionsTypeDto } from './dto/create-questions-type.dto';
-import { UpdateQuestionsTypeDto } from './dto/update-questions-type.dto';
+import { QuestionType } from './models/questions-type.interface';
 
 @Controller('questions-type')
 export class QuestionsTypeController {
   constructor(private readonly questionsTypeService: QuestionsTypeService) {}
 
   @Post()
-  create(@Body() createQuestionsTypeDto: CreateQuestionsTypeDto) {
+  create(@Body() createQuestionsTypeDto: QuestionType) {
     return this.questionsTypeService.create(createQuestionsTypeDto);
   }
 
@@ -23,7 +22,7 @@ export class QuestionsTypeController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateQuestionsTypeDto: UpdateQuestionsTypeDto) {
+  update(@Param('id') id: string, @Body() updateQuestionsTypeDto: QuestionType) {
     return this.questionsTypeService.update(+id, updateQuestionsTypeDto);
   }
 

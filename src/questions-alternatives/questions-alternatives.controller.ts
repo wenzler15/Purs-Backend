@@ -1,20 +1,19 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
 import { QuestionsAlternativesService } from './questions-alternatives.service';
-import { CreateQuestionsAlternativeDto } from './dto/create-questions-alternative.dto';
-import { UpdateQuestionsAlternativeDto } from './dto/update-questions-alternative.dto';
+import { QuestionAlternatives } from './models/questions-alternatives.interface';
 
 @Controller('questions-alternatives')
 export class QuestionsAlternativesController {
   constructor(private readonly questionsAlternativesService: QuestionsAlternativesService) {}
 
   @Post()
-  create(@Body() createQuestionsAlternativeDto: CreateQuestionsAlternativeDto) {
+  create(@Body() createQuestionsAlternativeDto: QuestionAlternatives) {
     return this.questionsAlternativesService.create(createQuestionsAlternativeDto);
   }
 
-  @Get()
-  findAll() {
-    return this.questionsAlternativesService.findAll();
+  @Get('getAlternatives/:id')
+  findAll(@Param('id') idQuestion: string) {
+    return this.questionsAlternativesService.findAll(+idQuestion);
   }
 
   @Get(':id')
@@ -23,7 +22,7 @@ export class QuestionsAlternativesController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateQuestionsAlternativeDto: UpdateQuestionsAlternativeDto) {
+  update(@Param('id') id: string, @Body() updateQuestionsAlternativeDto: QuestionAlternatives) {
     return this.questionsAlternativesService.update(+id, updateQuestionsAlternativeDto);
   }
 
