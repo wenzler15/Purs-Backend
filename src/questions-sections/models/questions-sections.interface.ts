@@ -1,9 +1,12 @@
+import { Question } from "src/questions/models/questions.interface";
+
 /* eslint-disable prettier/prettier */
 export interface QuestionSections {
-    id: number;
+    id?: number;
     idResearch: number;
     desc: string;
-    deletedAt: Date;
-    createdAt: Date;
-    updatedAt: Date;
+    questions?: Question[];
+    deletedAt?: Date;
+    createdAt?: Date;
+    updatedAt?: Date;
 }

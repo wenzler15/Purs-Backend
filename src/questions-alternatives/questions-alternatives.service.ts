@@ -12,9 +12,10 @@ export class QuestionsAlternativesService {
   ) { }
 
   async create(createQuestionsAlternativeDto: QuestionAlternatives) {
-    const question = await this.questionsAlternativeRepository.save(createQuestionsAlternativeDto);
 
-    return { message: 'Question alternative created!', question }
+    await this.questionsAlternativeRepository.save(createQuestionsAlternativeDto);
+  
+    return { message: 'Question alternative created!' }
   }
 
   async findAll(idQuestion: number) {

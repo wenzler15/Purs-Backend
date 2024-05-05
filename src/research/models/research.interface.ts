@@ -1,4 +1,6 @@
 /* eslint-disable prettier/prettier */
+import { QuestionSections } from 'src/questions-sections/models/questions-sections.interface';
+
 export interface Research {
     id: number;
     subtitle: string;
@@ -7,6 +9,7 @@ export interface Research {
     idCompany: number;
     idUser: number;
     status: number;
+    sections?: QuestionSections[];
     deletedAt: Date;
     createdAt: Date;
     updatedAt: Date;

@@ -7,7 +7,7 @@ export class QuestionsSectionsController {
   constructor(private readonly questionsSectionsService: QuestionsSectionsService) {}
 
   @Post()
-  create(@Body() createQuestionsSectionDto: QuestionSections) {
+  create(@Body() createQuestionsSectionDto: QuestionSections[]) {
     return this.questionsSectionsService.create(createQuestionsSectionDto);
   }
 

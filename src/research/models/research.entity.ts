@@ -1,5 +1,7 @@
 /* eslint-disable prettier/prettier */
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { QuestionsSectionsEntity } from 'src/questions-sections/models/questions-sections.entity';
+import { QuestionSections } from 'src/questions-sections/models/questions-sections.interface';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity('research')
 export class ResearchEntity {

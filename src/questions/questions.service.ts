@@ -3,15 +3,42 @@ import { Question } from './models/questions.interface';
 import { InjectRepository } from '@nestjs/typeorm';
 import { QuestionsEntity } from './models/questions.entity';
 import { Repository } from 'typeorm';
+import { QuestionAlternatives } from 'src/questions-alternatives/models/questions-alternatives.interface';
+import { QuestionsAlternativesService } from 'src/questions-alternatives/questions-alternatives.service';
 @Injectable()
 export class QuestionsService {
   constructor(
     @InjectRepository(QuestionsEntity)
     private readonly questionsRepository: Repository<QuestionsEntity>,
+    private readonly questionsAlternativesService: QuestionsAlternativesService
   ) { }
 
   async create(createQuestionDto: Question) {
-    const question = await this.questionsRepository.save(createQuestionDto);
+
+    const {
+      idResearch,
+      desc,
+      idSection,
+      idQuestionType,
+      notNull,
+      redirectSection,
+      alternatives
+    } = createQuestionDto
+
+    const question = await this.questionsRepository.save({
+      idResearch,
+      desc,
+      idSection,
+      idQuestionType,
+      notNull,
+      redirectSection,
+    });
+
+    alternatives.map( async (item: QuestionAlternatives) => {
+      item.idQuestion = question.id
+
+      await this.questionsAlternativesService.create(item)
+    });
 
     return { message: 'Question created!', question }
   }

@@ -11,7 +11,7 @@ export class ResearchController {
     return this.researchService.create(createResearchDto);
   }
 
-  @Get('getSections/:id')
+  @Get('getResearchs/:id')
   findAll(@Param('id') idCompany: string) {
     return this.researchService.findAll(+idCompany);
   }
