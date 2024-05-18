@@ -23,7 +23,7 @@ export class ResearchEntity {
     @Column({ type: 'integer' })
     idUser: number;
 
-    @Column({ type: 'integer' })
+    @Column({ type: 'integer', default: 1 })
     status: number;
 
     @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
