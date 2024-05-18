@@ -1,6 +1,7 @@
 /* eslint-disable prettier/prettier */
 import { QuestionsSectionsEntity } from 'src/questions-sections/models/questions-sections.entity';
 import { QuestionSections } from 'src/questions-sections/models/questions-sections.interface';
+import { SurveyResponseStatusEntity } from 'src/research-response/models/survey-response-status.entity';
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity('research')

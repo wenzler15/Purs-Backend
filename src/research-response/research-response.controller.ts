@@ -1,12 +1,13 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
 import { ResearchResponseService } from './research-response.service';
+import { ResearchResponse } from './models/research-response.interface';
 
 @Controller('research-response')
 export class ResearchResponseController {
   constructor(private readonly researchResponseService: ResearchResponseService) {}
 
   @Post()
-  create(@Body() createResearchResponseDto: any) {
+  create(@Body() createResearchResponseDto: ResearchResponse[]) {    
     return this.researchResponseService.create(createResearchResponseDto);
   }
 
@@ -16,7 +17,12 @@ export class ResearchResponseController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateResearchResponseDto: any) {
+  update(@Param('id') id: string, @Body() updateResearchResponseDto: ResearchResponse) {
     return this.researchResponseService.update(+id, updateResearchResponseDto);
+  }
+
+  @Get('verifyResearchs/:userId/:companyId')
+  findSurveys(@Param('userId') userId: string, @Param('companyId') companyId: string) {
+    return this.researchResponseService.findSurveys(+userId, +companyId);
   }
 }
