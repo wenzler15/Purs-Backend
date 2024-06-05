@@ -15,6 +15,7 @@ import { QuestionsSectionsModule } from './questions-sections/questions-sections
 import { QuestionsModule } from './questions/questions.module';
 import { ResearchModule } from './research/research.module';
 import { ResearchResponseModule } from './research-response/research-response.module';
+import { UploadsModule } from './uploads/uploads.module';
 
 @Module({
   imports: [
@@ -54,6 +55,7 @@ import { ResearchResponseModule } from './research-response/research-response.mo
     QuestionsModule,
     ResearchModule,
     ResearchResponseModule,
+    UploadsModule,
   ],
   controllers: [],
   providers: [],
