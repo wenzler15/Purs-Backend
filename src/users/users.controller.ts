@@ -32,32 +32,62 @@ export class UsersController {
     }
   }
 
-  @Get()
-  findAll() {
+  // @Get()
+  // findAll() {
+  //   try {
+  //     return this.usersService.findAll();
+  //   } catch (err) {
+  //     throw new Error("Internal Server Error");
+  //   }
+  // }
+
+  @Get('listEmployees')
+  listEmployees(@Headers() headers: Authorization) {
     try {
-      return this.usersService.findAll();
+      return this.usersService.listEmployees(headers.authorization);
     } catch (err) {
       throw new Error("Internal Server Error");
     }
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
+  @Get('dashEmployees')
+  dashEmployees(@Headers() headers: Authorization) {
     try {
-      return this.usersService.findOne(+id);
+      return this.usersService.dashEmployees(headers.authorization);
     } catch (err) {
       throw new Error("Internal Server Error");
     }
   }
 
-  @Patch(':id')
+  @Get('getOne')
+  findOne(@Headers() headers: Authorization) {
+    try {
+      return this.usersService.findOne(headers.authorization);
+    } catch (err) {
+      throw new Error("Internal Server Error");
+    }
+  }
+
+  @Patch()
   update(
+    @Body() updateUserDto: User,
+    @Headers() headers: Authorization,
+  ) {
+    try {
+      return this.usersService.update(updateUserDto, headers.authorization);
+    } catch (err) {
+      throw new Error("Internal Server Error");
+    }
+  }
+
+  @Patch('handleResp/:id')
+  handleResp(
     @Param('id') id: string,
     @Body() updateUserDto: User,
     @Headers() headers: Authorization,
   ) {
     try {
-      return this.usersService.update(+id, updateUserDto, headers.authorization);
+      return this.usersService.handleResp(+id, updateUserDto, headers.authorization);
     } catch (err) {
       throw new Error("Internal Server Error");
     }

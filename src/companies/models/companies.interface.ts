@@ -4,12 +4,17 @@ export interface Company {
     name: string;
     corporateName: string;
     cnpj: string;
+    logoLink: string;
     createdAt: Date;
     updatedAt: Date;
+    mission: string;
+    vision: string;
+    values: string;
     email: string;
     street?: string;
     district?: string;
     houseNumber?: string;
+    neighborhood?: string;
     city: string;
     state: string;
     zipCode: string;
@@ -17,6 +22,7 @@ export interface Company {
     status: number;
     token: string;
     password: string;
+    arrayResponsible: any;
     passwordResetToken?: string;
     passwordResetExpires?: Date;
 }

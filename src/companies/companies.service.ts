@@ -10,6 +10,9 @@ import { AuthEntity } from './models/auth.entity';
 import { ForgotPasswordEntity } from './models/forgotPassword.entity';
 import { MailerService } from '@nestjs-modules/mailer';
 import { ResetPasswordEntity } from './models/resetPassword.entity';
+import { UserEntity } from 'src/users/models/users.entity';
+import { UsersService } from 'src/users/users.service';
+import { User } from 'src/users/models/users.interface';
 
 const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
@@ -20,6 +23,9 @@ export class CompaniesService {
   constructor(
     @InjectRepository(CompanyEntity)
     private readonly companyRepository: Repository<CompanyEntity>,
+    @InjectRepository(UserEntity)
+    private readonly usersRepository: Repository<UserEntity>,
+    private readonly usersService: UsersService,
     private readonly mailerService: MailerService,
   ) { }
 
@@ -30,18 +36,38 @@ export class CompaniesService {
       where: { cnpj },
     });
 
-    if (companyExists) throw new HttpException("Company already exists!", HttpStatus.BAD_REQUEST);
+    if (companyExists) throw new HttpException("Company already exists!", HttpStatus.CONFLICT);    
 
-    createCompanyDto.password = await bcrypt.hash(createCompanyDto.password, 10);
+    const companyData = createCompanyDto;
 
-    const company = await this.companyRepository.save(createCompanyDto);
+    companyData.arrayResponsible = JSON.stringify(companyData.arrayResponsible)
 
-    company.password = undefined;
-    company.passwordResetExpires = undefined;
-    company.passwordResetToken = undefined;
-    company.token = undefined;
+    const company = await this.companyRepository.save(companyData);
 
-    return { message: 'Company created!', company }
+    createCompanyDto.arrayResponsible = JSON.parse(createCompanyDto.arrayResponsible);
+
+    await Promise.all(createCompanyDto.arrayResponsible.map(async (item: User) => {
+      const password = this.generateRandomPassword(10);
+
+      const userData = {
+        email: item.email,
+        password,
+        idCompany: company.id,
+        cpf: item.cpf,
+        tempPass: 1,
+        responsible: 1
+      }
+
+      const user = await this.usersService.create(userData);
+
+      if(user === false) {
+        this.companyRepository.delete(company.id)
+
+        throw new HttpException('User already exists!', HttpStatus.AMBIGUOUS);
+      }
+    }));
+
+    return { message: 'Company created!' }
   }
 
   async findAll() {
@@ -57,8 +83,17 @@ export class CompaniesService {
     return companies;
   }
 
-  async findOne(id: number) {
-    const company = await this.companyRepository.findOne({ where: { id } });
+  async findOne(token: string) {
+    const decodedToken = this.decodeToken(token)
+
+    const user = await this.usersRepository.findOne({ where: {id: decodedToken.id}});
+
+    if(user.responsible !== 1 || user.idCompany !== decodedToken.company
+      )  {
+      throw new HttpException("You don't have permission!", HttpStatus.METHOD_NOT_ALLOWED)
+    }
+
+    const company = await this.companyRepository.findOne({ where: { id: decodedToken.company } });
 
     if (!company) throw new HttpException("Company didn't exists!", HttpStatus.BAD_REQUEST);
 
@@ -70,14 +105,18 @@ export class CompaniesService {
     return company;
   }
 
-  async update(id: number, updateCompanyDto: Company, token: Headers) {
-    const company = await this.companyRepository.findOne({ where: { id } });
-
+  async getResponsibles(token: string) {
     const decodedToken = this.decodeToken(token)
 
-    if (decodedToken.id != id) {
-      throw new HttpException("You don't have permission!", HttpStatus.FORBIDDEN);
-    }
+    const responsibles = await this.usersRepository.find({ select: {email: true, name: true, id: true} , where: { idCompany: decodedToken.company, responsible: 1 } });
+
+    return responsibles;
+  }
+
+  async update(updateCompanyDto: Company, token: string) {
+    const decodedToken = this.decodeToken(token)
+
+    const company = await this.companyRepository.findOne({ where: { id: decodedToken.company } });
 
     if (!company) throw new HttpException("Company didn't exists!", HttpStatus.BAD_REQUEST);
 
@@ -96,7 +135,7 @@ export class CompaniesService {
     return { message: 'Company updated', company: companyUpdated };
   }
 
-  async remove(id: number, token: Headers) {
+  async remove(id: number, token: string) {
     const decodedToken = this.decodeToken(token)
 
     if (decodedToken.id != id) {
@@ -210,8 +249,8 @@ export class CompaniesService {
     return { message: 'Password updated!' }
   }
 
-  decodeToken(token: object) {
-    return jwt.decode(token);
+  decodeToken(token: string) {
+    return jwt.verify(token, '7ccd7835da99ef1dbbce76128d3ae0e7')
   }
 
   generateToken(params = {}) {
@@ -219,4 +258,14 @@ export class CompaniesService {
       expiresIn: 86400,
     });
   }
+
+  generateRandomPassword(length) {
+    const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+";
+    let password = "";
+    for (let i = 0; i < length; i++) {
+        const randomIndex = Math.floor(Math.random() * charset.length);
+        password += charset[randomIndex];
+    }
+    return password;
+}
 }

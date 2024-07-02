@@ -6,6 +6,8 @@ import { Company } from './models/companies.interface';
 import { ForgotPasswordEntity } from './models/forgotPassword.entity';
 import { ResetPasswordEntity } from './models/resetPassword.entity';
 import { Headers } from "@nestjs/common";
+import { Authorization } from '../users/models/authorization.interface';
+
 @Controller('companies')
 export class CompaniesController {
   constructor(private readonly companiesService: CompaniesService) { }
@@ -28,28 +30,37 @@ export class CompaniesController {
     }
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
+  @Get('getOne')
+  findOne(@Headers() headers: Authorization) {
     try {
-      return this.companiesService.findOne(+id);
+      return this.companiesService.findOne(headers.authorization);
     } catch (err) {
       throw new Error("Internal Server Error");
     }
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateCompanyDto: Company, @Headers('token') token: Headers) {
+  @Get('responsibles')
+  getResponsibles(@Headers() headers: Authorization) {
     try {
-      return this.companiesService.update(+id, updateCompanyDto, token);
+      return this.companiesService.getResponsibles(headers.authorization);
+    } catch (err) {
+      throw new Error("Internal Server Error");
+    }
+  }
+
+  @Patch()
+  update(@Body() updateCompanyDto: Company, @Headers() headers: Authorization) {
+    try {
+      return this.companiesService.update(updateCompanyDto, headers.authorization);
     } catch (err) {
       throw new Error("Internal Server Error");
     }
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string, @Headers('token') token: Headers) {
+  remove(@Param('id') id: string, @Headers() headers: Authorization) {
     try {
-      return this.companiesService.remove(+id, token);
+      return this.companiesService.remove(+id, headers.authorization);
     } catch (err) {
       throw new Error("Internal Server Error");
     }

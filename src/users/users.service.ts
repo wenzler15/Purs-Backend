@@ -14,6 +14,7 @@ import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { ExportUrlEntity } from 'src/export-url/models/exportUrl.entity';
 import { MailerService } from '@nestjs-modules/mailer';
 import { LeadEntity } from 'src/lead/models/lead.entity';
+import { CompanyEntity } from 'src/companies/models/companies.entity';
 
 const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
@@ -28,6 +29,8 @@ export class UsersService {
     private readonly exportUrl: Repository<ExportUrlEntity>,
     @InjectRepository(LeadEntity)
     private readonly leadRepository: Repository<LeadEntity>,
+    @InjectRepository(CompanyEntity)
+    private readonly companyRepository: Repository<CompanyEntity>,
     private readonly mailerService: MailerService,
   ) { }
 
@@ -38,12 +41,22 @@ export class UsersService {
       where: { cpf },
     });
 
-    if (userExists)
-      throw new HttpException('User already exists!', HttpStatus.BAD_REQUEST);
+    if (userExists) {
+      return false;
+    }
+
+    const backupPass = createUserDto.password;
 
     createUserDto.password = await bcrypt.hash(createUserDto.password, 10);
 
     const user = await this.userRepository.save(createUserDto);
+
+    await this.mailerService.sendMail({
+      to: createUserDto.email,
+      from: process.env.SEND_GRID_FROM,
+      subject: 'Novo usuário',
+      html: `<p>Você foi cadastrado pela sua empresa na Purs! <br/> Seja muito bem vindo(a) <br/> Use seu e-mail e essa senha temporária: ${backupPass}, para acessar a melhor plataforma de gestão. <br/> <a href="www.purs.com.br/login"> Clique aqui!</a> <p> `,
+    });
 
     user.password = undefined;
     user.passwordResetExpires = undefined;
@@ -66,6 +79,32 @@ export class UsersService {
     return users;
   }
 
+  async dashEmployees(token: string) {
+    const decodeToken = await this.decodeToken(token);
+
+    const employees = await this.userRepository
+                              .createQueryBuilder('user')
+                              .leftJoinAndSelect('user', 'leader', 'leader.id = user.idLeader')
+                              .where('user.idCompany = :idCompany', { idCompany: decodeToken.company })
+                              .select([
+                                'user.id',
+                                'user.name',
+                                'user.email',
+                                'leader.name AS leaderName'
+                              ])
+                              .getMany();
+
+    return employees;
+  }
+
+  async listEmployees(token: string) {
+    const decodeToken = await this.decodeToken(token);
+
+    const users = await this.userRepository.find({ select: {id: true, name: true, email: true}, where: {idCompany : decodeToken.company} });
+
+    return users;
+  }
+
   async findAllLeaders(token: string) {
     const decodeToken = this.decodeToken(token)
 
@@ -74,8 +113,12 @@ export class UsersService {
     return leaders;
   }
 
-  async findOne(id: number) {
-    const user = await this.userRepository.findOne({ where: { id } });
+  async findOne(token: string) {
+    const decodedToken = this.decodeToken(token)
+
+    const user: any = await this.userRepository.findOne({ where: { id: decodedToken.id } });
+
+    const company = await this.companyRepository.findOne({ where: { id: user.idCompany }});
 
     if (!user) throw new HttpException("User didn't exists!", HttpStatus.BAD_REQUEST);
 
@@ -84,16 +127,15 @@ export class UsersService {
     user.passwordResetToken = undefined;
     user.token = undefined;
 
+    user.companyLogo = company.logoLink;
+
     return user;
   }
 
-  async update(id: number, updateUserDto: User, token: string) {
+  async update(updateUserDto: User, token: string) {
     const decodedToken = this.decodeToken(token)
 
-    if (decodedToken.id != id) {
-      throw new HttpException("You don't have permission!", HttpStatus.FORBIDDEN);
-    }
-    const user = await this.userRepository.findOne({ where: { id } });
+    const user = await this.userRepository.findOne({ where: { id: decodedToken.id } });
 
     if (!user) throw new HttpException("User didn't exists!", HttpStatus.BAD_REQUEST);
 
@@ -112,6 +154,24 @@ export class UsersService {
 
     return { message: 'User updated', user: userUpdated };
   }
+
+  async handleResp(id: number, updateUserDto: User, token: string) {
+    const decodedToken = this.decodeToken(token)
+
+    const logged = await this.userRepository.findOne({ where: { id: decodedToken.id } });
+
+    if(logged.responsible !== 1) throw new HttpException("Unauthorizes", HttpStatus.UNAUTHORIZED);
+
+    const user = await this.userRepository.findOne({ where: { id } });
+
+    await this.userRepository.save({
+      ...user,
+      ...updateUserDto,
+    });
+
+    return { message: 'Responsibles updated!' };
+  }
+
 
   async remove(id: number, token: string) {
     const decodedToken = this.decodeToken(token)
@@ -261,7 +321,7 @@ export class UsersService {
 
   generateToken(params = {}) {
     return jwt.sign(params, '7ccd7835da99ef1dbbce76128d3ae0e7', {
-      expiresIn: 86400,
+      expiresIn: 8640000,
     });
   }
 

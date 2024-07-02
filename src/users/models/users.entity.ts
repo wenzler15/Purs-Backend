@@ -46,6 +46,15 @@ export class UserEntity {
     zipCode: string;
 
     @Column({ default: '' })
+    neighborhood: string;
+
+    @Column({ type: 'integer', nullable: true })
+    houseNumber?: number;
+
+    @Column({ default: ''})
+    complement: string;
+
+    @Column({ default: '' })
     phone: string;
 
     @Column({ type: 'integer', default: 1 })
@@ -53,6 +62,12 @@ export class UserEntity {
 
     @Column({ default: '' })
     token: string;
+
+    @Column({ type: 'integer', default: 1 })
+    tempPassword: number;
+
+    @Column({ type: 'integer', default: 0})
+    responsible: number;
 
     @Column({ default: '' })
     password: string;

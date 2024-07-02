@@ -13,6 +13,24 @@ export class CompanyEntity {
     corporateName: string;
 
     @Column({ default: '' })
+    logoLink: string;
+    
+    @Column({ default: '' })
+    neighborhood: string;
+
+    @Column({ default: '' })
+    arrayResponsible: string;
+
+    @Column({ default: '' })
+    mission: string;
+
+    @Column({ default: '' })
+    vision: string;
+
+    @Column({ default: '' })
+    values: string;
+
+    @Column({ default: '' })
     cnpj: string;
 
     @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
