@@ -16,6 +16,8 @@ import { QuestionsModule } from './questions/questions.module';
 import { ResearchModule } from './research/research.module';
 import { ResearchResponseModule } from './research-response/research-response.module';
 import { UploadsModule } from './uploads/uploads.module';
+import { GroupsModule } from './groups/groups.module';
+import { DepartmentsModule } from './departments/departments.module';
 
 @Module({
   imports: [
@@ -56,6 +58,8 @@ import { UploadsModule } from './uploads/uploads.module';
     ResearchModule,
     ResearchResponseModule,
     UploadsModule,
+    GroupsModule,
+    DepartmentsModule,
   ],
   controllers: [],
   providers: [],

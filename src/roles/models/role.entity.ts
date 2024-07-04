@@ -6,6 +6,24 @@ export class RoleEntity {
     @PrimaryGeneratedColumn()
     id: number;
 
+    @Column({ type: 'integer', nullable: true })
+    idDepartment?: number;
+
+    @Column({ type: 'varchar', array: true, nullable: true })
+    responsibilities: string[];
+
+    @Column({ type: 'varchar', array: true, nullable: true })
+    skills: string[];
+
+    @Column({ type: 'varchar', array: true, nullable: true })
+    qualifications: string[];
+
+    @Column({ type: 'integer', nullable: true })
+    minSalary: number;
+
+    @Column({ type: 'integer', nullable: true })
+    maxSalary: number;
+
     @Column({ type: 'integer' })
     idCompany: number;
 
@@ -14,9 +32,6 @@ export class RoleEntity {
 
     @Column({ default: '' })
     roleDesc: string;
-
-    @Column({ type: 'integer', default: 1 })
-    leader: number;
 
     @Column({ type: 'integer', default: 1 })
     status: number;
