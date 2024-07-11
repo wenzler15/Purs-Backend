@@ -9,8 +9,8 @@ export class GroupEntity {
     @Column({ type: 'integer' })
     idCompany: number;
 
-    @Column({ type: 'varchar', array: true, nullable: true })
-    users: string[];
+    @Column({ type: 'integer', array: true, nullable: true })
+    users: number[];
 
     @Column({ default: '' })
     name: string;

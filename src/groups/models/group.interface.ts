@@ -1,10 +1,10 @@
 /* eslint-disable prettier/prettier */
 export interface Group {
     id: number;
-    idCompany: number;
+    idCompany?: number;
     name: string;
     desc: string;
-    users: string[];
+    users: number[];
     createdAt: Date;
     updatedAt: Date;
 }

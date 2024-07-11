@@ -1,34 +1,34 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Headers } from '@nestjs/common';
 import { GroupsService } from './groups.service';
-import { CreateGroupDto } from './dto/create-group.dto';
-import { UpdateGroupDto } from './dto/update-group.dto';
+import { Group } from './models/group.interface';
+import { Authorization } from 'src/users/models/authorization.interface';
 
 @Controller('groups')
 export class GroupsController {
   constructor(private readonly groupsService: GroupsService) {}
 
   @Post()
-  create(@Body() createGroupDto: CreateGroupDto) {
-    return this.groupsService.create(createGroupDto);
+  create(@Headers() headers: Authorization, @Body() createGroupDto: Group) {
+    return this.groupsService.create(createGroupDto, headers.authorization);
   }
 
   @Get()
-  findAll() {
-    return this.groupsService.findAll();
+  findAll(@Headers() headers: Authorization) {
+    return this.groupsService.findAll(headers.authorization);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.groupsService.findOne(+id);
+  findOne(@Param('id') id: string, @Headers() headers: Authorization) {
+    return this.groupsService.findOne(+id, headers.authorization);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateGroupDto: UpdateGroupDto) {
-    return this.groupsService.update(+id, updateGroupDto);
+  update(@Param('id') id: string, @Body() updateGroupDto: Group, @Headers() headers: Authorization) {
+    return this.groupsService.update(+id, updateGroupDto, headers.authorization);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.groupsService.remove(+id);
+  remove(@Param('id') id: string, @Headers() headers: Authorization) {
+    return this.groupsService.remove(+id, headers.authorization);
   }
 }
