@@ -1,7 +1,7 @@
 /* eslint-disable prettier/prettier */
 export interface Role {
     id: number;
-    idCompany: number;
+    idCompany?: number;
     idDepartment?: number;
     roleName: string;
     roleDesc: string;

@@ -1,7 +1,7 @@
 /* eslint-disable prettier/prettier */
 export interface Department {
     id: number;
-    idCompany: number;
+    idCompany?: number;
     idLeader: number;
     name: string;
     desc: string;
