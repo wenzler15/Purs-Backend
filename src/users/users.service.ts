@@ -15,7 +15,6 @@ import { ExportUrlEntity } from 'src/export-url/models/exportUrl.entity';
 import { MailerService } from '@nestjs-modules/mailer';
 import { LeadEntity } from 'src/lead/models/lead.entity';
 import { CompanyEntity } from 'src/companies/models/companies.entity';
-
 const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
@@ -44,6 +43,10 @@ export class UsersService {
     if (userExists) {
       return false;
     }
+
+    if (!createUserDto.password || createUserDto.password == "") {
+      createUserDto.password = this.generateRandomPassword(10)
+    }    
 
     const backupPass = createUserDto.password;
 
@@ -349,4 +352,14 @@ export class UsersService {
     }
 
   }
+
+  generateRandomPassword(length) {
+    const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+";
+    let password = "";
+    for (let i = 0; i < length; i++) {
+        const randomIndex = Math.floor(Math.random() * charset.length);
+        password += charset[randomIndex];
+    }
+    return password;
+}
 }

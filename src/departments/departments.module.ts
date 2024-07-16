@@ -9,9 +9,10 @@ import { ExportUrlEntity } from 'src/export-url/models/exportUrl.entity';
 import { LeadEntity } from 'src/lead/models/lead.entity';
 import { CompaniesService } from 'src/companies/companies.service';
 import { UsersService } from 'src/users/users.service';
+import { RoleEntity } from 'src/roles/models/role.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([DepartmentEntity, CompanyEntity, UserEntity, ExportUrlEntity, LeadEntity])],
+  imports: [TypeOrmModule.forFeature([DepartmentEntity, CompanyEntity, UserEntity, ExportUrlEntity, LeadEntity, RoleEntity])],
   controllers: [DepartmentsController],
   providers: [DepartmentsService, CompaniesService, UsersService]
 })

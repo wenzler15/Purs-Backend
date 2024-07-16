@@ -4,12 +4,15 @@ import { Repository } from 'typeorm';
 import { RoleEntity } from './models/role.entity';
 import { Role } from './models/role.interface';
 import { CompaniesService } from 'src/companies/companies.service';
+import { DepartmentEntity } from 'src/departments/models/department.entity';
 
 @Injectable()
 export class RolesService {
   constructor(
     @InjectRepository(RoleEntity)
     private readonly roleRepository: Repository<RoleEntity>,
+    @InjectRepository(DepartmentEntity)
+    private readonly departmentRepository: Repository<DepartmentEntity>,
     private readonly companyService: CompaniesService
   ) { }
 
@@ -34,11 +37,15 @@ export class RolesService {
   async findOne(id: number, token: string) {
     const decodedToken = await this.companyService.decodeToken(token);
 
-    const role = await this.roleRepository.findOne({ where: { id } });
+    const role:any = await this.roleRepository.findOne({ where: { id } });
 
     if(role.idCompany !== decodedToken.company) throw new HttpException('User unauthorized!', HttpStatus.UNAUTHORIZED);
 
     if (!role) throw new HttpException("Role didn't exists!", HttpStatus.BAD_REQUEST);
+
+    const department = await this.departmentRepository.findOne({ where : { id: role.idDepartment }});
+
+    role.departmentName = department.name;
 
     return role;
   }

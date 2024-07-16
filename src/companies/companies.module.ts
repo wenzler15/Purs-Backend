@@ -8,6 +8,7 @@ import { UserEntity } from 'src/users/models/users.entity';
 import { UsersService } from 'src/users/users.service';
 import { ExportUrlEntity } from 'src/export-url/models/exportUrl.entity';
 import { LeadEntity } from 'src/lead/models/lead.entity';
+import { RoleEntity } from 'src/roles/models/role.entity';
 
 @Module({
   imports: [
@@ -15,7 +16,8 @@ import { LeadEntity } from 'src/lead/models/lead.entity';
       CompanyEntity,
       UserEntity,
       ExportUrlEntity,
-      LeadEntity
+      LeadEntity,
+      RoleEntity
     ]),
   ],
   controllers: [CompaniesController, CompaniesAuthController, CompaniesForgotPasswordController, CompaniesResetPasswordController],

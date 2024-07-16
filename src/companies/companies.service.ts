@@ -13,6 +13,7 @@ import { ResetPasswordEntity } from './models/resetPassword.entity';
 import { UserEntity } from 'src/users/models/users.entity';
 import { UsersService } from 'src/users/users.service';
 import { User } from 'src/users/models/users.interface';
+import { RoleEntity } from 'src/roles/models/role.entity';
 
 const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
@@ -25,6 +26,8 @@ export class CompaniesService {
     private readonly companyRepository: Repository<CompanyEntity>,
     @InjectRepository(UserEntity)
     private readonly usersRepository: Repository<UserEntity>,
+    @InjectRepository(RoleEntity)
+    private readonly roleRepository: Repository<RoleEntity>,
     private readonly usersService: UsersService,
     private readonly mailerService: MailerService,
   ) { }
@@ -109,6 +112,12 @@ export class CompaniesService {
     const decodedToken = this.decodeToken(token)
 
     const responsibles = await this.usersRepository.find({ select: {email: true, name: true, id: true} , where: { idCompany: decodedToken.company, responsible: 1 } });
+
+    await Promise.all(responsibles.map(async(item: any) => {
+      const role = await this.roleRepository.findOne({where: {id: item.idRole}})
+
+      item.roleName = role.roleName
+    }))
 
     return responsibles;
   }
