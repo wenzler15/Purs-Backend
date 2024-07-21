@@ -15,6 +15,7 @@ import { ExportUrlEntity } from 'src/export-url/models/exportUrl.entity';
 import { MailerService } from '@nestjs-modules/mailer';
 import { LeadEntity } from 'src/lead/models/lead.entity';
 import { CompanyEntity } from 'src/companies/models/companies.entity';
+import { RoleEntity } from 'src/roles/models/role.entity';
 const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
@@ -30,11 +31,13 @@ export class UsersService {
     private readonly leadRepository: Repository<LeadEntity>,
     @InjectRepository(CompanyEntity)
     private readonly companyRepository: Repository<CompanyEntity>,
+    @InjectRepository(RoleEntity)
+    private readonly roleRepository: Repository<RoleEntity>,
     private readonly mailerService: MailerService,
   ) { }
 
-  async create(createUserDto: User) {
-    const { cpf } = createUserDto;
+  async create(createUserDto: User, token: string = '') {
+    const { cpf, idCompany, password } = createUserDto;
 
     const userExists = await this.userRepository.findOne({
       where: { cpf },
@@ -44,7 +47,13 @@ export class UsersService {
       return false;
     }
 
-    if (!createUserDto.password || createUserDto.password == "") {
+    if (!idCompany || idCompany == null) {
+      const decodeToken = await this.decodeToken(token);
+
+      createUserDto.idCompany = decodeToken.company;
+    }
+
+    if (!password || password === "") {
       createUserDto.password = this.generateRandomPassword(10)
     }    
 
@@ -85,17 +94,19 @@ export class UsersService {
   async dashEmployees(token: string) {
     const decodeToken = await this.decodeToken(token);
 
-    const employees = await this.userRepository
-                              .createQueryBuilder('user')
-                              .leftJoinAndSelect('user', 'leader', 'leader.id = user.idLeader')
-                              .where('user.idCompany = :idCompany', { idCompany: decodeToken.company })
-                              .select([
-                                'user.id',
-                                'user.name',
-                                'user.email',
-                                'leader.name AS leaderName'
-                              ])
-                              .getMany();
+    const employees = await this.userRepository.find({ where: {idCompany: decodeToken.company}, select: ["id", "name", "email", "idLeader", "idRole"] });
+
+    await Promise.all(employees.map(async(item: any) => {
+      if(item.idLeader) {
+        const user = await this.userRepository.findOne({where: {id: item.idLeader}})
+        
+        item.leaderName = user.name;
+      }
+
+      const role = await this.roleRepository.findOne({where: {id: item.idRole }})
+      
+      item.roleName = role.roleName;
+    }))
 
     return employees;
   }
@@ -135,10 +146,39 @@ export class UsersService {
     return user;
   }
 
-  async update(updateUserDto: User, token: string) {
+  async getOne(token: string, id: number) {
     const decodedToken = this.decodeToken(token)
 
-    const user = await this.userRepository.findOne({ where: { id: decodedToken.id } });
+    const user: any = await this.userRepository.findOne({ where: { id, idCompany: decodedToken.company } });
+
+    const company = await this.companyRepository.findOne({ where: { id: user.idCompany }});
+
+    const role = await this.roleRepository.findOne({ where: {id: user.idRole}});
+
+    user.roleName = role.roleName;
+
+    if(user.idLeader) {
+      const leader = await this.userRepository.findOne({ where: {id: user.idLeader}});
+
+      user.leaderName = leader.name
+    }
+
+    if (!user) throw new HttpException("User didn't exists!", HttpStatus.BAD_REQUEST);
+
+    user.password = undefined;
+    user.passwordResetExpires = undefined;
+    user.passwordResetToken = undefined;
+    user.token = undefined;
+
+    user.companyLogo = company.logoLink;
+
+    return user;
+  }
+
+  async update(updateUserDto: User, token: string, id: number) {
+    const decodedToken = this.decodeToken(token)
+
+    const user = await this.userRepository.findOne({ where: { id, idCompany: decodedToken.company } });
 
     if (!user) throw new HttpException("User didn't exists!", HttpStatus.BAD_REQUEST);
 

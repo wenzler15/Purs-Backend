@@ -24,9 +24,12 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) { }
 
   @Post()
-  create(@Body() createUserDto: User) {
+  create(
+    @Body() createUserDto: User,
+    @Headers() headers: Authorization,
+    ) {
     try {
-      return this.usersService.create(createUserDto);
+      return this.usersService.create(createUserDto, headers.authorization);
     } catch (err) {
       throw new Error("Internal Server Error");
     }
@@ -68,13 +71,23 @@ export class UsersController {
     }
   }
 
-  @Patch()
+  @Get(':id')
+  getOne(@Param('id') id: string, @Headers() headers: Authorization) {
+    try {
+      return this.usersService.getOne(headers.authorization, +id);
+    } catch (err) {
+      throw new Error("Internal Server Error");
+    }
+  }
+
+  @Patch(':id')
   update(
+    @Param('id') id: string,
     @Body() updateUserDto: User,
     @Headers() headers: Authorization,
   ) {
     try {
-      return this.usersService.update(updateUserDto, headers.authorization);
+      return this.usersService.update(updateUserDto, headers.authorization, +id);
     } catch (err) {
       throw new Error("Internal Server Error");
     }
