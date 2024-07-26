@@ -8,4 +8,3 @@ export interface Group {
     createdAt: Date;
     updatedAt: Date;
 }
-
