@@ -34,19 +34,21 @@ export class QuestionsService {
       redirectSection,
     });
 
-    alternatives.map( async (item: QuestionAlternatives) => {
-      item.idQuestion = question.id
+    if (idQuestionType === 3 || idQuestionType === 4) {
+      alternatives.map(async (item: QuestionAlternatives) => {
+        item.idQuestion = question.id
 
-      await this.questionsAlternativesService.create(item)
-    });
+        await this.questionsAlternativesService.create(item)
+      });
+    }
 
     return { message: 'Question created!', question }
   }
 
   async findAll(idSection: number) {
-    const questions = await this.questionsRepository.find({ where: {idSection} });
+    const questions = await this.questionsRepository.find({ where: { idSection } });
 
-    return questions;  
+    return questions;
   }
 
   async findOne(id: number) {
@@ -54,7 +56,8 @@ export class QuestionsService {
 
     if (!questions) throw new HttpException("questions didn't exists!", HttpStatus.BAD_REQUEST);
 
-    return questions;  }
+    return questions;
+  }
 
   async update(id: number, updateQuestionDto: Question) {
     const question = await this.questionsRepository.findOne({ where: { id } });
@@ -66,7 +69,8 @@ export class QuestionsService {
       ...updateQuestionDto,
     })
 
-    return { message: 'Question updated!', role: questionUpdated };  }
+    return { message: 'Question updated!', role: questionUpdated };
+  }
 
   async remove(id: number) {
     const question = await this.questionsRepository.findOne({ where: { id } });

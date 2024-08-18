@@ -8,7 +8,7 @@ export interface Research {
     title: string;
     idCompany: number;
     idUser: number;
-    status: number;
+    status: string;
     sections?: QuestionSections[];
     deletedAt: Date;
     createdAt: Date;

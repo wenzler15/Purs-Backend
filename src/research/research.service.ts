@@ -19,7 +19,13 @@ export class ResearchService {
     private readonly questionsAlternativesService: QuestionsAlternativesService
   ) { }
 
-  async create(createResearchDto: Research) {
+  async init(createResearchDto: Research) {
+    const question = await this.researchRepository.save(createResearchDto);
+
+    return { message: 'Research created!', question }
+  }
+
+  async create(createResearchDto: Research, id: number) {
     const { 
       subtitle,
       desc,
@@ -30,22 +36,31 @@ export class ResearchService {
       sections
     } = createResearchDto;
 
-    const research = await this.researchRepository.save({
+    const researchOrigin = await this.researchRepository.findOne({ where: { id } });
+
+    if (!researchOrigin) throw new HttpException("Research didn't exists!", HttpStatus.BAD_REQUEST);
+
+    const infosUpdate = {
       subtitle,
       desc,
       title,
       idCompany,
       idUser,
       status
-    });
+    }
+
+    await this.researchRepository.save({
+      ...researchOrigin,
+      ...infosUpdate,
+    })
 
     sections.map((item: QuestionSections) => {
-      item.idResearch = research.id
+      item.idResearch = id
     });
 
     await this.questionsSectionsService.create(sections)
 
-    return { message: 'Question section created!' }
+    return { message: 'Research updated!' }
   }
 
   async findAll(idCompany: number) {

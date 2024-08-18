@@ -24,8 +24,8 @@ export class ResearchEntity {
     @Column({ type: 'integer' })
     idUser: number;
 
-    @Column({ type: 'integer', default: 1 })
-    status: number;
+    @Column({ default: 'pending' })
+    status: string;
 
     @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
     createdAt: Date;

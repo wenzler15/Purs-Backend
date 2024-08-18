@@ -7,8 +7,13 @@ export class ResearchController {
   constructor(private readonly researchService: ResearchService) {}
 
   @Post()
-  create(@Body() createResearchDto: Research) {
-    return this.researchService.create(createResearchDto);
+  init(@Param('id') id: string, @Body() createResearchDto: Research) {
+    return this.researchService.init(createResearchDto);
+  }
+
+  @Patch(':id')
+  create(@Param('id') id: string, @Body() createResearchDto: Research) {
+    return this.researchService.create(createResearchDto, +id);
   }
 
   @Get('getResearchs/:id')
@@ -26,7 +31,7 @@ export class ResearchController {
     return this.researchService.findOne(+id);
   }
 
-  @Patch(':id')
+  @Patch('updateInfo/:id')
   update(@Param('id') id: string, @Body() updateResearchDto: Research) {
     return this.researchService.update(+id, updateResearchDto);
   }
