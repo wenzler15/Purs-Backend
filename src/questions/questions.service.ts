@@ -51,6 +51,12 @@ export class QuestionsService {
     return questions;
   }
 
+  async findAllCustom(idSection: number) {
+    const questions = await this.questionsRepository.find({ select:['id', 'idQuestionType', 'notNull', 'redirectSection'], where: { idSection } });
+
+    return questions;
+  }
+
   async findOne(id: number) {
     const questions = await this.questionsRepository.findOne({ where: { id } });
 

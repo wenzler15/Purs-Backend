@@ -43,6 +43,12 @@ export class QuestionsSectionsService {
     return researchSections;
   }
 
+  async findAllCustom(idResearch: number) {
+    const researchSections = await this.questionSectionRepository.find({ select: ['id', 'desc'] ,where: { idResearch }});
+
+    return researchSections;
+  }
+
   async findOne(id: number) {
     const sections = await this.questionSectionRepository.findOne({ where: { id } });
 

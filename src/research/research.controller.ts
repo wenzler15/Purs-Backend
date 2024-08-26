@@ -1,6 +1,7 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Headers } from '@nestjs/common';
 import { ResearchService } from './research.service';
 import { Research } from './models/research.interface';
+import { Authorization } from 'src/users/models/authorization.interface';
 
 @Controller('research')
 export class ResearchController {
@@ -16,14 +17,19 @@ export class ResearchController {
     return this.researchService.create(createResearchDto, +id);
   }
 
-  @Get('getResearchs/:id')
-  findAll(@Param('id') idCompany: string) {
-    return this.researchService.findAll(+idCompany);
+  @Get('duplicate/:id')
+  duplicate(@Param('id') idResearch: string) {
+    return this.researchService.duplicate(+idResearch);
   }
 
-  @Get('myResearchs/:id')
-  myResearch(@Param('id') idUser: string) {
-    return this.researchService.myResearch(+idUser);
+  @Get('getResearchs')
+  findAll(@Headers() headers: Authorization) {
+    return this.researchService.findAll(headers.authorization);
+  }
+
+  @Get('myResearchs')
+  myResearch(@Headers() headers: Authorization) {
+    return this.researchService.myResearch(headers.authorization);
   }
 
   @Get(':id')

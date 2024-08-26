@@ -8,6 +8,7 @@ import { QuestionsSectionsService } from 'src/questions-sections/questions-secti
 import { QuestionsService } from 'src/questions/questions.service';
 import { Question } from 'src/questions/models/questions.interface';
 import { QuestionsAlternativesService } from 'src/questions-alternatives/questions-alternatives.service';
+const jwt = require('jsonwebtoken');
 
 @Injectable()
 export class ResearchService {
@@ -63,14 +64,70 @@ export class ResearchService {
     return { message: 'Research updated!' }
   }
 
-  async findAll(idCompany: number) {
-    const researchs = await this.researchRepository.find({ where: { idCompany }});
+  async findAll(token: string) {
+    const decodedToken = this.decodeToken(token);
+
+    const researchs = await this.researchRepository.find({ where: { idCompany: decodedToken.company }});
 
     return researchs;
   }
 
-  async myResearch(idUser: number) {
-    const researchs = await this.researchRepository.find({ where: { idUser }});
+  async duplicate(id: number) {
+    const research:any = await this.researchRepository.find({ select: ['id', 'subtitle', 'desc', 'title', 'idCompany', 'idUser', 'status'], where: { id }});
+  
+    await Promise.all(research.map(async (research: Research) => {
+      research.sections = await this.questionsSectionsService.findAllCustom(research.id) 
+
+      research.id = undefined;
+
+      await Promise.all(research.sections.map(async (section: QuestionSections) => {
+        section.questions = await this.questionsService.findAllCustom(section.id);
+  
+        section.id = undefined;
+
+        await Promise.all(section.questions.map(async (question: Question) => {
+          question.alternatives = await this.questionsAlternativesService.findAllCustom(question.id);
+
+          question.id = undefined;
+
+          question.alternatives.map((item) => item.id = undefined);
+        }));
+      }));
+    })) 
+
+    const { 
+      subtitle,
+      desc,
+      title,
+      idCompany,
+      idUser,
+      status
+    } = research[0];
+
+    const infosUpdate = {
+      subtitle,
+      desc,
+      title,
+      idCompany,
+      idUser,
+      status
+    }
+
+    const newResearch = await this.researchRepository.save(infosUpdate);
+    
+    research[0].sections.map((item: QuestionSections) => {
+      item.idResearch = newResearch.id
+    });
+
+    await this.questionsSectionsService.create(research[0].sections)
+
+    return { message: 'Research duplicated!' };
+  }
+
+  async myResearch(token: string) {
+    const decodedToken = this.decodeToken(token);
+
+    const researchs = await this.researchRepository.find({ where: { idUser: decodedToken.id }});
 
     await Promise.all(researchs.map(async (research: Research) => {
       research.sections = await this.questionsSectionsService.findAll(research.id) 
@@ -126,4 +183,8 @@ export class ResearchService {
     if (!research) throw new HttpException("Research didn't exists!", HttpStatus.BAD_REQUEST);
 
     return { message: 'Research deleted!', question: this.researchRepository.delete(id) }  }  
+
+    decodeToken(token: string) {
+      return jwt.verify(token, '7ccd7835da99ef1dbbce76128d3ae0e7')
+    }
 }

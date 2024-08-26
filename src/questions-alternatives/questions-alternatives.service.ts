@@ -24,6 +24,12 @@ export class QuestionsAlternativesService {
     return questions;
   }
 
+  async findAllCustom(idQuestion: number) {
+    const questions = await this.questionsAlternativeRepository.find({ select: ['id', 'desc'], where: { idQuestion }});
+
+    return questions;
+  }
+
   async findOne(id: number) {
     const questions = await this.questionsAlternativeRepository.findOne({ where: { id } });
 
