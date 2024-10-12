@@ -36,11 +36,29 @@ export class ResearchResponseService {
   }
 
   async findResponses(userId: number, researchId: number) {
-    const researchResponses = await this.researchResponseRepository.findOne({ where: { userId , researchId } });
+    const researchResponses = await this.researchResponseRepository.find({ where: { userId , researchId } });
 
     if (!researchResponses) throw new HttpException("researchResponses didn't exists!", HttpStatus.BAD_REQUEST);
 
     return researchResponses;
+  }
+
+  async findResponsesGraph(researchId: number) {
+    const researchResponses = await this.researchResponseRepository.find({ select: ['id', 'questionId', 'answer'], where: { researchId } });
+
+    if (!researchResponses) throw new HttpException("researchResponses didn't exists!", HttpStatus.BAD_REQUEST);
+
+    return researchResponses;
+  }
+
+  async findResponsesByQuestion(researchId: number, questionId: number) {
+    const researchResponses = await this.researchResponseRepository.find({select: ['answer'], where: { researchId, questionId } });
+
+    if (!researchResponses) throw new HttpException("researchResponses didn't exists!", HttpStatus.BAD_REQUEST);
+
+    const converted = this.countWords(researchResponses);
+
+    return converted;
   }
 
   async update(id: number, updateResearchResponseDto: ResearchResponse) {
@@ -79,4 +97,37 @@ export class ResearchResponseService {
 
   return mergedArray
   }
+
+  countWords(data) {
+    const wordCount = {};
+
+    const monosyllabicWords = new Set(["a", "e", "de", "do", "da", "ou"]);
+
+    data.forEach(item => {
+        // Separar a resposta em palavras
+        const words = item.answer.split(/\s+/);
+
+        words.forEach(word => {
+            // Remover caracteres especiais e converter para minúsculas
+            const cleanedWord = word.replace(/[^a-zA-Z]/g, '').toLowerCase();
+
+            // Verificar se a palavra tem mais de 3 letras e não está na lista de palavras monossílabas
+            if (cleanedWord.length > 3 && !monosyllabicWords.has(cleanedWord)) {
+                // Contar as ocorrências da palavra
+                if (!wordCount[cleanedWord]) {
+                    wordCount[cleanedWord] = 0;
+                }
+                wordCount[cleanedWord]++;
+            }
+        });
+    });
+
+    // Converter o objeto de contagem para o formato desejado
+    const wordsArray = Object.keys(wordCount).map(word => ({
+        text: word.charAt(0).toUpperCase() + word.slice(1), // Capitalize a primeira letra
+        value: wordCount[word]
+    }));
+
+    return wordsArray;
+}
 }

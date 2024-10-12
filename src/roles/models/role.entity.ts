@@ -9,14 +9,14 @@ export class RoleEntity {
     @Column({ type: 'integer', nullable: true })
     idDepartment?: number;
 
-    @Column({ type: 'varchar', array: true, nullable: true })
-    responsibilities: string[];
+    @Column({ type: 'json', nullable: true })
+    responsibilities: { response: string; desc: string }[];
 
-    @Column({ type: 'varchar', array: true, nullable: true })
-    skills: string[];
-
-    @Column({ type: 'varchar', array: true, nullable: true })
-    qualifications: string[];
+    @Column({ type: 'json', nullable: true })
+    skills: { response: string; desc: string }[];
+    
+    @Column({ type: 'json', nullable: true })
+    qualifications: { response: string; desc: string }[];
 
     @Column({ type: 'integer', nullable: true })
     minSalary: number;

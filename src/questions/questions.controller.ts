@@ -1,6 +1,7 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Headers } from '@nestjs/common';
 import { QuestionsService } from './questions.service';
 import { Question } from './models/questions.interface';
+import { Authorization } from 'src/users/models/authorization.interface';
 
 @Controller('questions')
 export class QuestionsController {
@@ -14,6 +15,11 @@ export class QuestionsController {
   @Get('getQuestions/:id')
   findAll(@Param('id') idSection: string) {
     return this.questionsService.findAll(+idSection);
+  }
+
+  @Get('getQuestionsByResearch/:id')
+  getQuestion(@Param('id') idResearch: string) {
+    return this.questionsService.findAllQuestions(+idResearch);
   }
 
   @Get(':id')

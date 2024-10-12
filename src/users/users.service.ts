@@ -7,7 +7,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { AuthEntity } from 'src/companies/models/auth.entity';
 import { ForgotPasswordEntity } from 'src/companies/models/forgotPassword.entity';
 import { ResetPasswordEntity } from 'src/companies/models/resetPassword.entity';
-import { Repository } from 'typeorm';
+import { ILike, Repository } from 'typeorm';
 import { UserEntity } from './models/users.entity';
 import { User } from './models/users.interface';
 import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
@@ -109,6 +109,32 @@ export class UsersService {
     }))
 
     return employees;
+  }
+
+  async chartpage(token: string) {
+    const decodeToken = await this.decodeToken(token);
+
+    const chart = await this.userRepository.query('SELECT u.name, u.email, u2.email as father, r."roleName" as title FROM "user" as u LEFT JOIN "user" as u2 ON u."idLeader" = u2.id INNER JOIN "role" as r on u."idRole" = r.id WHERE u."idCompany" = $1', [decodeToken.company]);
+
+    chart.map((item) => {
+      if (item.father === null) {
+        item.father = ''
+      }
+    })
+
+    return chart;
+  }
+
+  async hasCeo(token: string) {
+    const decodeToken = await this.decodeToken(token);
+
+    const roleId = await this.roleRepository.findOne({ where: {idCompany: decodeToken.company, roleName: ILike("CEO")}, select: ["id"]});
+
+    if (!roleId) return false;
+
+    const hasCEO = await this.userRepository.findOne({ where: {idCompany: decodeToken.company, idRole: roleId.id}, select: ["id", "name", "email", "idLeader", "idRole"] });
+
+    return hasCEO ? hasCEO.id : false;
   }
 
   async listEmployees(token: string) {
@@ -302,30 +328,30 @@ export class UsersService {
     return { message: 'Token sent' };
   }
 
-  async generateURL(file: any, token: string) {
+  async generateURL(token: string) {
     const userDecoded = await this.decodeToken(token);
 
-    const user = await this.leadRepository.findOne({ where: { id: userDecoded.id } });
+    // const user = await this.leadRepository.findOne({ where: { id: userDecoded.id } });
 
-    const ext = file.originalname.split(".")[1];
+    // const ext = file.originalname.split(".")[1];
 
     const hash = crypto.createHash('sha256');
 
-    hash.update(user.email);
+    hash.update(userDecoded.company.toString());
 
-    const hashedEmail = hash.digest('hex');
+    const hashedCompany = hash.digest('hex');
 
-    await this.uploadFile(file, 'purs-docs', `${hashedEmail}.${ext}`)
+    // await this.uploadFile(file, 'purs-docs', `${hashedCompany}.${ext}`)
 
-    const urlExists = await this.exportUrl.findOne({ where: { link: `https://purs-docs.s3.amazonaws.com/${hashedEmail}.${ext}` } });
+    const urlExists = await this.exportUrl.findOne({ where: { link: hashedCompany } });
 
     if (!urlExists) {
-      const url = await this.exportUrl.save({ link: `https://purs-docs.s3.amazonaws.com/${hashedEmail}.${ext}` });
+      const url = await this.exportUrl.save({ link: hashedCompany, companyId: userDecoded.company.toString()});
 
-      return { message: 'Export url created!', link: url.id }
+      return { message: 'Export url created!', link: hashedCompany }
     }
 
-    return { message: 'Export url created!', link: urlExists.id }
+    return { message: 'Export url created!', link: hashedCompany }
   }
 
   async resetPassword(resetPassword: ResetPasswordEntity) {

@@ -5,6 +5,8 @@ import { QuestionsEntity } from './models/questions.entity';
 import { Repository } from 'typeorm';
 import { QuestionAlternatives } from 'src/questions-alternatives/models/questions-alternatives.interface';
 import { QuestionsAlternativesService } from 'src/questions-alternatives/questions-alternatives.service';
+const jwt = require('jsonwebtoken');
+
 @Injectable()
 export class QuestionsService {
   constructor(
@@ -51,6 +53,12 @@ export class QuestionsService {
     return questions;
   }
 
+  async findAllQuestions(idResearch: number) {
+    const questions = await this.questionsRepository.find({ select:['id', 'desc', 'idQuestionType'], where: { idResearch } });
+
+    return questions;
+  }
+
   async findAllCustom(idSection: number) {
     const questions = await this.questionsRepository.find({ select:['id', 'idQuestionType', 'notNull', 'redirectSection'], where: { idSection } });
 
@@ -84,5 +92,9 @@ export class QuestionsService {
     if (!question) throw new HttpException("question didn't exists!", HttpStatus.BAD_REQUEST);
 
     return { message: 'question deleted!', question: this.questionsRepository.delete(id) }
+  }
+
+  decodeToken(token: string) {
+    return jwt.verify(token, '7ccd7835da99ef1dbbce76128d3ae0e7')
   }
 }

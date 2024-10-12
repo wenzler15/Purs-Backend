@@ -16,6 +16,16 @@ export class ResearchResponseController {
     return this.researchResponseService.findResponses(+userId, +researchId);
   }
 
+  @Get(':researchId')
+  findResponsesGraph(@Param('researchId') researchId: string) {
+    return this.researchResponseService.findResponsesGraph(+researchId);
+  }
+
+  @Get('cloudResp/:researchId/:questionId')
+  findResponsesByQuestion(@Param('researchId') researchId: string, @Param('questionId') questionId: string) {
+    return this.researchResponseService.findResponsesByQuestion(+researchId, +questionId);
+  }
+
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateResearchResponseDto: ResearchResponse) {
     return this.researchResponseService.update(+id, updateResearchResponseDto);

@@ -80,6 +80,20 @@ export class UsersController {
     }
   }
 
+  @Get('chartpage/create')
+  chartpage(@Headers() headers: Authorization) {
+    return this.usersService.chartpage(headers.authorization);
+  }
+
+  @Get('hasCEO/verify')
+  hasCeo(@Headers() headers: Authorization) {
+    try {
+      return this.usersService.hasCeo(headers.authorization);
+    } catch (err) {
+      throw new Error("Internal Server Error");
+    }
+  }
+
   @Patch(':id')
   update(
     @Param('id') id: string,
@@ -176,11 +190,10 @@ export class UsersResetPasswordController {
 export class UsersCreateURLOrgController {
   constructor(private readonly usersService: UsersService) { }
 
-  @Post()
-  @UseInterceptors(FileInterceptor("orgfile"))
-  createURL(@UploadedFile() file: Express.Multer.File, @Headers() headers: Authorization) {
+  @Get()
+  createURL(@Headers() headers: Authorization) {
     try {
-      return this.usersService.generateURL(file, headers.authorization);
+      return this.usersService.generateURL(headers.authorization);
     } catch (err) {
       throw new Error('Internal Server Error');
     }

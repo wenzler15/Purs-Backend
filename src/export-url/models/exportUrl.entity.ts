@@ -9,6 +9,9 @@ export class ExportUrlEntity {
     @Column({ default: '' })
     link: string;
 
+    @Column({ default: ''})
+    companyId: string;
+
     @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
     createdAt: Date;
 }
